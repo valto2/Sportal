@@ -29,3 +29,7 @@ buildNumber.properties
 *.ear
 *.nar
 hs_err_pid*
+*.log
+
+##Test files
+Test/
