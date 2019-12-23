@@ -1,7 +1,7 @@
 package DAO;
 
 import elements.Picture;
-import model.article.Article;
+import elements.Article;
 import model.db.DBManager;
 
 import java.sql.*;
@@ -37,8 +37,9 @@ public class PictureDAO {
         } catch (SQLException e) {
             try {
                 connection.rollback();
+                System.out.println("Unsuccessful attempt to add pictures! " + e.getMessage());
             } catch (SQLException ex) {
-                throw new SQLException("Unsuccessful attempt to add pictures! " + ex.getMessage());
+                throw new SQLException("Unsuccessful connection.rollback()! " + ex.getMessage());
             }
         } finally {
             connection.setAutoCommit(true);

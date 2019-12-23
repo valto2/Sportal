@@ -1,4 +1,4 @@
-package model.article;
+package elements;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +10,6 @@ public class Article {
     private LocalDateTime createDateAndTime;
     private int views;
     private int authorID;
-    private int adminID;
 
     public Article() {
     }
@@ -61,13 +60,5 @@ public class Article {
 
     public void setAuthorID(int authorID) {
         this.authorID = authorID;
-    }
-
-    public int getAdminID() {
-        return adminID;
-    }
-
-    public void setAdminID(int adminID) {
-        this.adminID = adminID;
     }
 }

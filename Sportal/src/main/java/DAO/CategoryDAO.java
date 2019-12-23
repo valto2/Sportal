@@ -1,7 +1,7 @@
 package DAO;
 
 import elements.Category;
-import model.article.Article;
+import elements.Article;
 import model.db.DBManager;
 
 import java.sql.Connection;
@@ -103,7 +103,7 @@ public class CategoryDAO {
         ArrayList<Article> listWithArticles = new ArrayList<>();
         if (temporaryCategory != null) {
             String allArticles = "SELECT a.id, a.title, a.full_text_url, a.date_published, " +
-                    "a.views, a.author_id, a.admin_id " +
+                    "a.views, a.author_id " +
                     "FROM articles AS a " +
                     "JOIN articles_categories AS aa ON a.id = aa.article_id " +
                     "JOIN categories AS c ON aa.category_id = c.id " +
@@ -120,7 +120,6 @@ public class CategoryDAO {
                     article.setCreateDateAndTime(row.getTimestamp("a.date_published").toLocalDateTime());
                     article.setViews(row.getInt("a.views"));
                     article.setAuthorID(row.getInt("a.author_id"));
-                    article.setAdminID(row.getInt("a.admin_id"));
 
                     listWithArticles.add(article);
                 }
