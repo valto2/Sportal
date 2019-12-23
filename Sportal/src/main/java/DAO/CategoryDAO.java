@@ -38,7 +38,7 @@ public class CategoryDAO {
     public void addingCategoryToArticle(String category, Article article) throws SQLException, SQLException {
         Connection connection = DBManager.INSTANCE.getConnection();
         Category temporaryCategory = this.findCategoryIDByText(category);
-        if(temporaryCategory != null) {
+        if (temporaryCategory != null) {
             String insertCategoryToArticleSQL =
                     "INSERT INTO articles_categories (article_id ,category_id) " +
                             "VALUES (?,?);";
@@ -55,30 +55,21 @@ public class CategoryDAO {
 
     private Category findCategoryIDByText(String category) throws SQLException {
         Connection connection = DBManager.INSTANCE.getConnection();
-        String allCategories = "SELECT c.id, c.category_name FROM categories AS c;";
+        String allCategories = "SELECT c.id, c.category_name FROM categories AS c WHERE c.category_name = ?;";
 
-        ArrayList<Category> listWithCategories = new ArrayList<>();
+        Category tempCategory = null;
 
         try (PreparedStatement statement = connection.prepareStatement(allCategories)) {
+            statement.setString(1, category);
             ResultSet row = statement.executeQuery();
-            while (row.next()) {
-                Category tempCategory = new Category();
+            if (row.next()) {
+                tempCategory = new Category();
                 tempCategory.setId(row.getInt("c.id"));
                 tempCategory.setCategory(row.getString("c.category_name"));
-                listWithCategories.add(tempCategory);
             }
         }
 
-        return this.checkingForExist(listWithCategories, category);
-    }
-
-    private Category checkingForExist(ArrayList<Category> listWithCategories, String category) {
-        for (Category c: listWithCategories){
-            if (c.getCategory().equals(category)){
-                return c;
-            }
-        }
-        return null;
+        return tempCategory;
     }
 
     public ArrayList<String> allCategoriesToASpecificArticle(Article article) throws SQLException {
@@ -109,7 +100,7 @@ public class CategoryDAO {
         Connection connection = DBManager.INSTANCE.getConnection();
         Category temporaryCategory = this.findCategoryIDByText(category);
         ArrayList<Article> listWithArticles = new ArrayList<>();
-        if(temporaryCategory != null) {
+        if (temporaryCategory != null) {
             String allArticles = "SELECT " +
                     "a.id, " +
                     "a.title, " +
