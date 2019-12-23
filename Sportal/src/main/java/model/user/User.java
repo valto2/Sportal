@@ -1,4 +1,4 @@
-package model.user;
+package elements;
 
 public class User {
 
@@ -6,12 +6,16 @@ public class User {
     private String username;
     private String email;
     private String password;
-    private Boolean isAdmin;
+    private boolean isAdmin;
 
-    public User(String username, String email, String password, Boolean isAdmin) {
+    public User(String username, String password, String email) {
         this.username = username;
-        this.email = email;
         this.password = password;
+        this.email = email;
+    }
+
+    public User(String username, String password, String email, boolean isAdmin) {
+        this(username,password,email);
         this.isAdmin = isAdmin;
     }
 
@@ -47,11 +51,11 @@ public class User {
         this.password = password;
     }
 
-    public Boolean getAdmin() {
+    public boolean getAdmin() {
         return isAdmin;
     }
 
-    public void setAdmin(Boolean admin) {
-        isAdmin = admin;
+    public void setAdmin(boolean admin) {
+       this.isAdmin = admin;
     }
 }

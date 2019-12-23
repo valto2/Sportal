@@ -117,7 +117,7 @@ public class CategoryDAO {
                     article.setId(row.getInt("a.id"));
                     article.setTitle(row.getString("a.title"));
                     article.setFullText(row.getString("a.full_text"));
-                    article.setCreateDateAndTime(row.getTimestamp("a.date_published").toLocalDateTime());
+                    article.setCreateDateAndTime(row.getTimestamp("a.date_published"));
                     article.setViews(row.getInt("a.views"));
                     article.setAuthorID(row.getInt("a.author_id"));
 

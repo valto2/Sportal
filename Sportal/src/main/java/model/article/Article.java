@@ -1,13 +1,13 @@
 package elements;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 public class Article {
 
     private int id;
     private String title;
     private String fullText;
-    private LocalDateTime createDateAndTime;
+    private Timestamp createDateAndTime;
     private int views;
     private int authorID;
 
@@ -38,11 +38,11 @@ public class Article {
         this.fullText = fullText;
     }
 
-    public LocalDateTime getCreateDateAndTime() {
+    public Timestamp getCreateDateAndTime() {
         return createDateAndTime;
     }
 
-    public void setCreateDateAndTime(LocalDateTime createDateAndTime) {
+    public void setCreateDateAndTime(Timestamp createDateAndTime) {
         this.createDateAndTime = createDateAndTime;
     }
 
