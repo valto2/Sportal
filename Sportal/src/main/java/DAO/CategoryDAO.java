@@ -24,8 +24,7 @@ public class CategoryDAO {
     public void addingCategory(String category) throws SQLException, SQLException {
         Connection connection = DBManager.INSTANCE.getConnection();
         String insertCategorySQL =
-                "INSERT INTO categories (category_name) " +
-                        "VALUES (?);";
+                "INSERT INTO categories (category_name) VALUES (?);";
 
         try (PreparedStatement statement = connection.prepareStatement(insertCategorySQL)) {
             statement.setString(1, category);
@@ -40,16 +39,19 @@ public class CategoryDAO {
         Category temporaryCategory = this.findCategoryIDByText(category);
         if (temporaryCategory != null) {
             String insertCategoryToArticleSQL =
-                    "INSERT INTO articles_categories (article_id ,category_id) " +
-                            "VALUES (?,?);";
+                    "INSERT INTO articles_categories (article_id ,category_id) VALUES (?,?);";
 
             try (PreparedStatement statement = connection.prepareStatement(insertCategoryToArticleSQL)) {
                 statement.setInt(1, article.getId());
                 statement.setInt(2, temporaryCategory.getId());
                 statement.executeUpdate();
 
-                System.out.println("Successfully added a category to an article");
+                String success = "Successfully added a category to an article";
+                System.out.println(success);
             }
+        } else {
+            String ifCategoryIsNull = "This category is not exists";
+            System.out.println(ifCategoryIsNull);
         }
     }
 
@@ -74,10 +76,9 @@ public class CategoryDAO {
 
     public ArrayList<String> allCategoriesToASpecificArticle(Article article) throws SQLException {
         Connection connection = DBManager.INSTANCE.getConnection();
-        String allCategories = "SELECT" +
-                " c.category_name " +
+        String allCategories = "SELECT c.category_name " +
                 "FROM categories AS c " +
-                "JOIN article_ategories AS aa ON c.id = aa.category_id " +
+                "JOIN articles_categories AS aa ON c.id = aa.category_id " +
                 "JOIN articles AS a ON a.id = aa.article_id " +
                 "WHERE article_Id = ?;";
 
@@ -101,16 +102,10 @@ public class CategoryDAO {
         Category temporaryCategory = this.findCategoryIDByText(category);
         ArrayList<Article> listWithArticles = new ArrayList<>();
         if (temporaryCategory != null) {
-            String allArticles = "SELECT " +
-                    "a.id, " +
-                    "a.title, " +
-                    "a.full_text, " +
-                    "a.date_published, " +
-                    "a.views, " +
-                    "a.author_id, " +
-                    "a.admin_id, " +
+            String allArticles = "SELECT a.id, a.title, a.full_text_url, a.date_published, " +
+                    "a.views, a.author_id, a.admin_id " +
                     "FROM articles AS a " +
-                    "JOIN article_ategories AS aa ON a.id = aa.article_id " +
+                    "JOIN articles_categories AS aa ON a.id = aa.article_id " +
                     "JOIN categories AS c ON aa.category_id = c.id " +
                     "WHERE category_id = ?;";
 
@@ -130,6 +125,9 @@ public class CategoryDAO {
                     listWithArticles.add(article);
                 }
             }
+        }else {
+            String ifCategoryIsNull = "This category is not exists";
+            System.out.println(ifCategoryIsNull);
         }
 
         return listWithArticles;

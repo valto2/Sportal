@@ -21,8 +21,7 @@ public class AuthorDAO {
         Connection connection = DBManager.INSTANCE.getConnection();
 
         String insertAuthorSQL =
-                "INSERT INTO authors (first_name, last_name) " +
-                        "VALUES (?, ?);";
+                "INSERT INTO authors (first_name, last_name) VALUES (?, ?);";
 
         try (PreparedStatement statement = connection.prepareStatement(insertAuthorSQL)) {
             statement.setString(1, author.getFirstName());
@@ -36,13 +35,10 @@ public class AuthorDAO {
     public Author theAuthorOfSpecificArticle(Article article) throws SQLException {
         Connection connection = DBManager.INSTANCE.getConnection();
 
-        String findAuthorByArticleId = "SELECT " +
-                "a.id, " +
-                "a.first_name, " +
-                "a.last_name , " +
+        String findAuthorByArticleId = "SELECT a.id, a.first_name, a.last_name " +
                 "FROM authors AS a " +
                 "JOIN  articles AS ar ON a.id = ar.author_id " +
-                "WHERE a.article_id = ?";
+                "WHERE ar.id = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(findAuthorByArticleId)) {
 

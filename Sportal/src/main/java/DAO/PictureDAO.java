@@ -21,9 +21,7 @@ public class PictureDAO {
     public void addingOfPicturesToTheArticle(ArrayList<Picture> pictures, Article article) throws SQLException {
         Connection connection = DBManager.INSTANCE.getConnection();
 
-        String insertPictureSQL =
-                "INSERT INTO pictures (picture_url, article_id) " +
-                        "VALUES (?, ?);";
+        String insertPictureSQL = "INSERT INTO pictures (picture_url, article_id) VALUES (?, ?);";
 
         try (PreparedStatement statement = connection.prepareStatement(insertPictureSQL)) {
             connection.setAutoCommit(false);
@@ -49,11 +47,7 @@ public class PictureDAO {
 
     public ArrayList<Picture> allPicturesToASpecificArticle(Article article) throws SQLException {
         Connection connection = DBManager.INSTANCE.getConnection();
-        String allPictures = "SELECT " +
-                "p.id, " +
-                "p.picture_url, " +
-                "FROM pictures AS p " +
-                "WHERE article_Id = ?;";
+        String allPictures = "SELECT p.id, p.picture_url FROM pictures AS p WHERE article_Id = ?;";
 
         ArrayList<Picture> listWithPictures = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(allPictures)) {
@@ -70,6 +64,4 @@ public class PictureDAO {
 
         return listWithPictures;
     }
-
-    // todo deletePicture
 }
