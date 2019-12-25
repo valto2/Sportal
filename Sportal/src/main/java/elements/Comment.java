@@ -6,16 +6,25 @@ public class Comment {
 
     private int id;
     private String fullCommentText;
-    private LocalDateTime createDateAndTime;
+    private LocalDateTime timePosted;
     private int userID;
     private int articleID;
+    private int reply_id; // add in DB
 
     public Comment(int id, String fullCommentText, LocalDateTime createDateAndTime, int userID, int articleID) {
         this.id = id;
         this.fullCommentText = fullCommentText;
-        this.createDateAndTime = createDateAndTime;
+        this.timePosted = createDateAndTime;
         this.userID = userID;
         this.articleID = articleID;
+    }
+
+    public int getReply_id() {
+        return reply_id;
+    }
+
+    public void setReply_id(int reply_id) {
+        this.reply_id = reply_id;
     }
 
     public int getId() {
@@ -34,12 +43,12 @@ public class Comment {
         this.fullCommentText = fullCommentText;
     }
 
-    public LocalDateTime getCreateDateAndTime() {
-        return createDateAndTime;
+    public LocalDateTime getTimePosted() {
+        return timePosted;
     }
 
-    public void setCreateDateAndTime(LocalDateTime createDateAndTime) {
-        this.createDateAndTime = createDateAndTime;
+    public void setTimePosted(LocalDateTime timePosted) {
+        this.timePosted = timePosted;
     }
 
     public int getUserID() {

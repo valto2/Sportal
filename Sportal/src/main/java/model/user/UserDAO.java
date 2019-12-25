@@ -1,7 +1,9 @@
 package model.user;
 
+import elements.User;
 import model.db.DBManager;
 import model.exceptions.UserException;
+import org.graalvm.compiler.lir.LIRInstruction;
 
 import java.sql.*;
 

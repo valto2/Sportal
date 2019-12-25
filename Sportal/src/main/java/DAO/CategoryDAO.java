@@ -125,7 +125,7 @@ public class CategoryDAO {
                 }
             }
         }else {
-            String ifCategoryIsNull = "This category is not exists";
+            String ifCategoryIsNull = "This category does not exists";
             System.out.println(ifCategoryIsNull);
         }
 
