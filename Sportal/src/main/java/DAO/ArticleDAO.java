@@ -44,8 +44,8 @@ public class ArticleDAO {
     }
 
     // edit article
-    // edit title 
-    // edit full_text
+    // edit title (and last date of edited)
+    // edit full_text (and last date of edited)
 
     public void addViewOfSpecificArticle(Article article) throws SQLException {
         Connection connection = DBManager.INSTANCE.getConnection();
@@ -80,27 +80,50 @@ public class ArticleDAO {
     }
 
     // dislike article TODO ?????
-    public void dislikeOfSpecificArticle(Article article, User user) throws SQLException {        
+    public void dislikeOfSpecificArticle(Article article, User user) throws SQLException {
+//        if (!user.getAdmin()) {
+//            Connection connection = DBManager.INSTANCE.getConnection();
+//
+//            String insertLikeSQL = "INSERT INTO users_like_articles (article_id, user_id) VALUE (?, ?);";
+//
+//            try (PreparedStatement statement = connection.prepareStatement(insertLikeSQL)) {
+//                statement.setInt(1, article.getId());
+//                statement.setInt(2, user.getId());
+//                statement.executeUpdate();
+//                String success = "Successfully added like of article!";
+//                System.out.println(success);
+//            }
+//        }else {
+//            String youAreAdmin = "You are admin. You have not to like a article!";
+//            System.out.println(youAreAdmin);
+//        }
     }
 
-    public ArrayList<Article> allArticleByTitle(String title) throws SQLException {
+    public ArrayList<Article> allArticleByTitleOrCategory(String titleOrCategory) throws SQLException {
         Connection connection = DBManager.INSTANCE.getConnection();
 
         String findAllArticleSQL = "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id " +
                 "FROM articles AS a " +
+                "JOIN articles_categories AS aa ON a.id = aa.article_id " +
+                "JOIN categories AS c ON aa.category_id = c.id " +
+                "WHERE c.category_name LIKE ? " +
+                "UNION " +
+                "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id " +
+                "FROM articles AS a " +
                 "WHERE a.title LIKE ?;";
         ArrayList<Article> listWithArticles = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(findAllArticleSQL)) {
-            statement.setString(1, title + "%");
+            statement.setString(1, titleOrCategory + "%");
+            statement.setString(2, titleOrCategory + "%");
             ResultSet row = statement.executeQuery();
             while (row.next()) {
                 Article article = new Article();
-                article.setId(row.getInt("a.id"));
-                article.setTitle(row.getString("a.title"));
-                article.setFullText(row.getString("a.full_text"));
-                article.setCreateDateAndTime(row.getTimestamp("a.date_published"));
-                article.setViews(row.getInt("a.views"));
-                article.setAuthorID(row.getInt("a.author_id"));
+                article.setId(row.getInt(1));
+                article.setTitle(row.getString(2));
+                article.setFullText(row.getString(3));
+                article.setCreateDateAndTime(row.getTimestamp(4));
+                article.setViews(row.getInt(5));
+                article.setAuthorID(row.getInt(6));
 
                 listWithArticles.add(article);
             }
