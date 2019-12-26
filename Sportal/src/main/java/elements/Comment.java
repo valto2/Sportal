@@ -1,23 +1,16 @@
 package elements;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 public class Comment {
 
     private int id;
     private String fullCommentText;
-    private LocalDateTime timePosted;
+    private Timestamp timePosted;
     private int userID;
     private int articleID;
     private int reply_id; // add in DB
 
-    public Comment(int id, String fullCommentText, LocalDateTime createDateAndTime, int userID, int articleID) {
-        this.id = id;
-        this.fullCommentText = fullCommentText;
-        this.timePosted = createDateAndTime;
-        this.userID = userID;
-        this.articleID = articleID;
-    }
 
     public int getReply_id() {
         return reply_id;
@@ -43,11 +36,11 @@ public class Comment {
         this.fullCommentText = fullCommentText;
     }
 
-    public LocalDateTime getTimePosted() {
+    public Timestamp getTimePosted() {
         return timePosted;
     }
 
-    public void setTimePosted(LocalDateTime timePosted) {
+    public void setTimePosted(Timestamp timePosted) {
         this.timePosted = timePosted;
     }
 

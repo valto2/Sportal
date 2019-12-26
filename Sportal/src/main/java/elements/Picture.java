@@ -6,9 +6,6 @@ public class Picture {
     private String urlOFPicture;
     private int articleID;
 
-    public Picture() {
-    }
-
     public int getId() {
         return id;
     }

@@ -32,7 +32,7 @@ public class ArticleDAO {
                 statement.setString(2, article.getFullText());
                 statement.setTimestamp(3, article.getCreateDateAndTime());
                 statement.setInt(4, 0);
-                statement.setInt(5, user.getId());
+                statement.setInt(5, article.getAuthorID());
                 statement.executeUpdate();
                 String success = "Successful add article!";
                 System.out.println(success);
@@ -43,60 +43,69 @@ public class ArticleDAO {
         }
     }
 
-    // edit article
-    // edit title (and last date of edited)
-    // edit full_text (and last date of edited)
+    public void editTheTitleOfSpecificArticle(int articleID, User user, String newTitle) throws SQLException {
+        if (user.getAdmin()) {
+            Connection connection = DBManager.INSTANCE.getConnection();
 
-    public void addViewOfSpecificArticle(Article article) throws SQLException {
+            String updateArticleTitleSQL = "UPDATE articles SET title = ? WHERE id = ?;";
+            try (PreparedStatement statement = connection.prepareStatement(updateArticleTitleSQL)) {
+                statement.setInt(2, articleID);
+                statement.setString(1, newTitle);
+                int rowAffected = statement.executeUpdate();
+                String success = rowAffected + " row, successful edited title of the article!";
+                System.out.println(success);
+            }
+        } else {
+            String message = "You are not admin or article not exists!";
+            System.out.println(message);
+        }
+    }
+
+    public void editTheTextOfSpecificArticle(int articleID, User user, String newText) throws SQLException {
+        if (user.getAdmin()) {
+            Connection connection = DBManager.INSTANCE.getConnection();
+
+            String updateArticleTextSQL = "UPDATE articles SET full_text = ? WHERE id = ?;";
+            try (PreparedStatement statement = connection.prepareStatement(updateArticleTextSQL)) {
+                statement.setInt(2, articleID);
+                statement.setString(1, newText);
+                int rowAffected = statement.executeUpdate();
+                String affected = rowAffected + " row, successful edited text of the article!";
+                System.out.println(affected);
+            }
+        } else {
+            String message = "You are not admin!";
+            System.out.println(message);
+        }
+    }
+
+    public void deleteArticle(int articleID, User user) throws SQLException {
+        if (user.getAdmin()) {
+            Connection connection = DBManager.INSTANCE.getConnection();
+            String deleteCommentSQL = "DELETE FROM articles WHERE id = ?;";
+            try (PreparedStatement statement = connection.prepareStatement(deleteCommentSQL)) {
+                statement.setInt(1, articleID);
+                int rowAffected = statement.executeUpdate();
+                String success = rowAffected + " row, successful delete article!";
+                System.out.println(success);
+            }
+        } else {
+            String message = "You are not admin or article not exists!";
+            System.out.println(message);
+        }
+    }
+
+    public void addViewOfSpecificArticle(int articleID) throws SQLException {
         Connection connection = DBManager.INSTANCE.getConnection();
 
         String updateViewsSQL = "UPDATE articles SET views = views + 1 WHERE id = ?;";
 
         try (PreparedStatement statement = connection.prepareStatement(updateViewsSQL)) {
-            statement.setInt(1, article.getId());
-            statement.executeUpdate();
-            String success = "Successfully added view of article!";
+            statement.setInt(1, articleID);
+            int rowAffected = statement.executeUpdate();
+            String success = rowAffected + " row, successfully added view of article!";
             System.out.println(success);
         }
-    }
-
-    public void likeOfSpecificArticle(Article article, User user) throws SQLException {
-        if (!user.getAdmin()) {
-            Connection connection = DBManager.INSTANCE.getConnection();
-
-            String insertLikeSQL = "INSERT INTO users_like_articles (article_id, user_id) VALUE (?, ?);";
-
-            try (PreparedStatement statement = connection.prepareStatement(insertLikeSQL)) {
-                statement.setInt(1, article.getId());
-                statement.setInt(2, user.getId());
-                statement.executeUpdate();
-                String success = "Successfully added like of article!";
-                System.out.println(success);
-            }
-        } else {
-            String youAreAdmin = "You are admin. You have not to like a article!";
-            System.out.println(youAreAdmin);
-        }
-    }
-
-    // dislike article TODO ?????
-    public void dislikeOfSpecificArticle(Article article, User user) throws SQLException {
-//        if (!user.getAdmin()) {
-//            Connection connection = DBManager.INSTANCE.getConnection();
-//
-//            String insertLikeSQL = "INSERT INTO users_like_articles (article_id, user_id) VALUE (?, ?);";
-//
-//            try (PreparedStatement statement = connection.prepareStatement(insertLikeSQL)) {
-//                statement.setInt(1, article.getId());
-//                statement.setInt(2, user.getId());
-//                statement.executeUpdate();
-//                String success = "Successfully added like of article!";
-//                System.out.println(success);
-//            }
-//        }else {
-//            String youAreAdmin = "You are admin. You have not to like a article!";
-//            System.out.println(youAreAdmin);
-//        }
     }
 
     public ArrayList<Article> allArticleByTitleOrCategory(String titleOrCategory) throws SQLException {
@@ -131,7 +140,8 @@ public class ArticleDAO {
         return listWithArticles;
     }
 
-    public String theAuthorNameOfSpecificArticle(Article article) throws SQLException {
+    public String theAuthorNameOfSpecificArticle(int articleID) throws SQLException {
+        String authorName = null;
         Connection connection = DBManager.INSTANCE.getConnection();
 
         String findAuthorByArticleIdSQL = "SELECT u.user_name " +
@@ -140,11 +150,8 @@ public class ArticleDAO {
                 "WHERE a.id = ?;";
 
         try (PreparedStatement statement = connection.prepareStatement(findAuthorByArticleIdSQL)) {
-
-            statement.setInt(1, article.getAuthorID());
-
+            statement.setInt(1, articleID);
             ResultSet row = statement.executeQuery();
-            String authorName = null;
             if (row.next()) {
                 authorName = row.getString("u.user_name");
                 System.out.println("Successful find of author!");

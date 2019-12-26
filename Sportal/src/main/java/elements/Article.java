@@ -11,9 +11,6 @@ public class Article {
     private int views;
     private int authorID;
 
-    public Article() {
-    }
-
     public int getId() {
         return id;
     }
@@ -60,5 +57,17 @@ public class Article {
 
     public void setAuthorID(int authorID) {
         this.authorID = authorID;
+    }
+
+    @Override
+    public String toString() {
+        return "Article{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", fullText='" + fullText + '\'' +
+                ", createDateAndTime=" + createDateAndTime +
+                ", views=" + views +
+                ", authorID=" + authorID +
+                '}';
     }
 }

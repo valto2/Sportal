@@ -2,6 +2,7 @@ package DAO;
 
 import elements.Category;
 import elements.Article;
+import elements.User;
 import model.db.DBManager;
 
 import java.sql.Connection;
@@ -34,47 +35,7 @@ public class CategoryDAO {
         }
     }
 
-    public void addingCategoryToArticle(String category, Article article) throws SQLException, SQLException {
-        Connection connection = DBManager.INSTANCE.getConnection();
-        Category temporaryCategory = this.findCategoryIDByText(category);
-        if (temporaryCategory != null) {
-            String insertCategoryToArticleSQL =
-                    "INSERT INTO articles_categories (article_id ,category_id) VALUES (?,?);";
-
-            try (PreparedStatement statement = connection.prepareStatement(insertCategoryToArticleSQL)) {
-                statement.setInt(1, article.getId());
-                statement.setInt(2, temporaryCategory.getId());
-                statement.executeUpdate();
-
-                String success = "Successfully added a category to an article";
-                System.out.println(success);
-            }
-        } else {
-            String ifCategoryIsNull = "This category is not exists";
-            System.out.println(ifCategoryIsNull);
-        }
-    }
-
-    private Category findCategoryIDByText(String category) throws SQLException {
-        Connection connection = DBManager.INSTANCE.getConnection();
-        String allCategories = "SELECT c.id, c.category_name FROM categories AS c WHERE c.category_name = ?;";
-
-        Category tempCategory = null;
-
-        try (PreparedStatement statement = connection.prepareStatement(allCategories)) {
-            statement.setString(1, category);
-            ResultSet row = statement.executeQuery();
-            if (row.next()) {
-                tempCategory = new Category();
-                tempCategory.setId(row.getInt("c.id"));
-                tempCategory.setCategory(row.getString("c.category_name"));
-            }
-        }
-
-        return tempCategory;
-    }
-
-    public ArrayList<String> allCategoriesToASpecificArticle(Article article) throws SQLException {
+    public ArrayList<String> allCategoriesToASpecificArticle(int articleID) throws SQLException {
         Connection connection = DBManager.INSTANCE.getConnection();
         String allCategories = "SELECT c.category_name " +
                 "FROM categories AS c " +
@@ -85,7 +46,7 @@ public class CategoryDAO {
         ArrayList<String> listWithCategories = new ArrayList<>();
 
         try (PreparedStatement statement = connection.prepareStatement(allCategories)) {
-            statement.setInt(1, article.getId());
+            statement.setInt(1, articleID);
             ResultSet row = statement.executeQuery();
             while (row.next()) {
                 String category = row.getString("c.category_name");
@@ -99,10 +60,10 @@ public class CategoryDAO {
 
     public ArrayList<Article> allArticlesToASpecificCategory(String category) throws SQLException {
         Connection connection = DBManager.INSTANCE.getConnection();
-        Category temporaryCategory = this.findCategoryIDByText(category);
+        Category temporaryCategory = CategoryDAO.findCategoryByText(category);
         ArrayList<Article> listWithArticles = new ArrayList<>();
         if (temporaryCategory != null) {
-            String allArticles = "SELECT a.id, a.title, a.full_text_url, a.date_published, " +
+            String allArticles = "SELECT a.id, a.title, a.full_text, a.date_published, " +
                     "a.views, a.author_id " +
                     "FROM articles AS a " +
                     "JOIN articles_categories AS aa ON a.id = aa.article_id " +
@@ -130,5 +91,40 @@ public class CategoryDAO {
         }
 
         return listWithArticles;
+    }
+
+    public void deleteCategory(int categoryID, User user) throws SQLException {
+        if (user.getAdmin()){
+            Connection connection = DBManager.INSTANCE.getConnection();
+            String deleteCommentSQL= "DELETE FROM categories WHERE id = ?;";
+            try (PreparedStatement statement = connection.prepareStatement(deleteCommentSQL)) {
+                statement.setInt(1, categoryID);
+                int rowAffected = statement.executeUpdate();
+                String success = rowAffected + " row, successful delete category!";
+                System.out.println(success);
+            }
+        }else {
+            String message = "You are not admin!";
+            System.out.println(message);
+        }
+    }
+
+    private static Category findCategoryByText(String category) throws SQLException {
+        Connection connection = DBManager.INSTANCE.getConnection();
+        String allCategories = "SELECT c.id, c.category_name FROM categories AS c WHERE c.category_name = ?;";
+
+        Category tempCategory = null;
+
+        try (PreparedStatement statement = connection.prepareStatement(allCategories)) {
+            statement.setString(1, category);
+            ResultSet row = statement.executeQuery();
+            if (row.next()) {
+                tempCategory = new Category();
+                tempCategory.setId(row.getInt("c.id"));
+                tempCategory.setCategory(row.getString("c.category_name"));
+            }
+        }
+
+        return tempCategory;
     }
 }
