@@ -32,7 +32,7 @@ public class PictureDAO {
             }
 
             connection.commit();
-            System.out.println("Successful added Of pictures!");
+            System.out.println("Successfully added Of pictures!");
         } catch (SQLException e) {
             try {
                 connection.rollback();

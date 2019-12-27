@@ -31,7 +31,7 @@ public class CategoryDAO {
             statement.setString(1, category);
             statement.executeUpdate();
 
-            System.out.println("Successful added of category!");
+            System.out.println("Successful added of a new category!");
         }
     }
 

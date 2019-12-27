@@ -34,7 +34,7 @@ public class ArticleDAO {
                 statement.setInt(4, 0);
                 statement.setInt(5, article.getAuthorID());
                 statement.executeUpdate();
-                String success = "Successful add article!";
+                String success = "Successful added article!";
                 System.out.println(success);
             }
         } else {
@@ -79,6 +79,7 @@ public class ArticleDAO {
         }
     }
 
+    //
     public void deleteArticle(int articleID, User user) throws SQLException {
         if (user.getAdmin()) {
             Connection connection = DBManager.INSTANCE.getConnection();
@@ -154,7 +155,7 @@ public class ArticleDAO {
             ResultSet row = statement.executeQuery();
             if (row.next()) {
                 authorName = row.getString("u.user_name");
-                System.out.println("Successful find of author!");
+                System.out.println("Successfully found of author!");
             }
 
             return authorName;

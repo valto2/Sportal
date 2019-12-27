@@ -26,7 +26,7 @@ public class ArticlesCategoriesDAO {
             statement.setInt(2, articleID);
             int rowAffected = statement.executeUpdate();
 
-            String success = rowAffected + " row, successfully added a category to an article";
+            String success = rowAffected + " row, successfully added!";
             System.out.println(success);
         }
     }
