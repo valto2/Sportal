@@ -1,0 +1,72 @@
+[33mcommit cfda2da98b51edc5a3e2139276c1d7c65b5ef52f[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: 403661d ca49ac4
+Author: valto2 <valtoto296@gmail.com>
+Date:   Wed Dec 25 12:17:08 2019 +0200
+
+    Merge branch 'master' of https://github.com/valto2/FinalProjectItTalents
+
+[33mcommit 403661d476817342918c97553fb47b4ba50644c8[m
+Author: valto2 <valtoto296@gmail.com>
+Date:   Wed Dec 25 12:10:57 2019 +0200
+
+    added commentDAO: add,reply,edit,delete,like,dislike comment , commentException and comment reply_id in Comment class
+
+[33mcommit ca49ac47052adb687ff6c655e99ba932a217361e[m
+Author: Vasil Veselinov <vasil.v.veselinov@gmail.com>
+Date:   Wed Dec 25 08:53:44 2019 +0200
+
+    modified the method for search of article by category or title
+
+[33mcommit e8a36110325b2eda1fab7bfd0ad6fb4887089e56[m
+Author: Vasil Veselinov <vasil.v.veselinov@gmail.com>
+Date:   Mon Dec 23 22:57:45 2019 +0200
+
+    class ArticleDAO added and modified classes CategoryDAO, Article, User
+
+[33mcommit 5ca505a30e5389cf8c46c2a583c73a1470a1d179[m
+Author: Vasil Veselinov <vasil.v.veselinov@gmail.com>
+Date:   Mon Dec 23 17:15:02 2019 +0200
+
+    classes after database editing
+
+[33mcommit f7a453ae3c94b62763d52b1d2f294d5935912f27[m
+Author: Vasil Veselinov <vasil.v.veselinov@gmail.com>
+Date:   Mon Dec 23 14:17:04 2019 +0200
+
+    correction of syntax errors in the DAO classes
+
+[33mcommit aa4997e78d712fa2e2de15e80496105a8451adfc[m
+Author: Vasil Veselinov <vasil.v.veselinov@gmail.com>
+Date:   Mon Dec 23 07:43:40 2019 +0200
+
+    edited class CategoryDAO, delete checking method
+
+[33mcommit c9f1c0bcd2c453fa57738bc772525b88ec4b9685[m
+Author: Vasil Veselinov <vasil.v.veselinov@gmail.com>
+Date:   Sun Dec 22 23:41:44 2019 +0200
+
+    add classes Author, Category, Comment, Picture and DAO them
+
+[33mcommit 05848758f918a85998732ea6754ec27b25e16342[m
+Author: Vasil Veselinov <vasil.v.veselinov@gmail.com>
+Date:   Sun Dec 22 14:58:11 2019 +0200
+
+    added in .gitignore test directory
+
+[33mcommit 9769d0c9a357cfee2160d8f9eb994a01ae4bb902[m
+Author: valto2 <valtoto296@gmail.com>
+Date:   Sun Dec 22 12:33:35 2019 +0200
+
+    added class User,UserDAO,XML file fixed,DBManager, Methods added login,register,check existing mail and username
+
+[33mcommit 49f9d76b23312bd508aff32c3a39d0df75a2912e[m
+Author: Vasil Veselinov <vasil.v.veselinov@gmail.com>
+Date:   Sat Dec 21 20:22:40 2019 +0200
+
+    added for Java files
+
+[33mcommit 71746e4e2d6954dd741669c95ac018b06e3014d0[m
+Author: Vasil Veselinov <vasil.v.veselinov@gmail.com>
+Date:   Fri Dec 20 22:44:09 2019 +0200
+
+    Added .gitignore file
