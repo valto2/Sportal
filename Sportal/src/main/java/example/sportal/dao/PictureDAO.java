@@ -1,66 +1,53 @@
 package example.sportal.dao;
 
+import example.sportal.dao.interfaceDAO.IDAOAllPOJOByID;
+import example.sportal.dao.interfaceDAO.IDAODeleteByID;
+import example.sportal.model.POJO;
 import example.sportal.model.Picture;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collection;
 
-public class PictureDAO {
+@Component
+public class PictureDAO extends DAO implements IDAODeleteByID, IDAOAllPOJOByID {
 
-    private static PictureDAO instance = new PictureDAO();
-
-    private PictureDAO() {
+    public void addingOfPictureToTheArticle(Picture pictures) throws SQLException {
+        String insertSQL = "INSERT INTO pictures (picture_url, article_id) VALUES (?, ?);";
+        this.jdbcTemplate.update(insertSQL, pictures.getUrlOFPicture(), pictures.getArticleID());
     }
 
-    public static PictureDAO getInstance() {
-        return instance;
+    @Override
+    public int deleteByID(long id) throws SQLException {
+        String deleteSQL = "DELETE FROM pictures WHERE id = ?;";
+        int rowAffected = this.jdbcTemplate.update(deleteSQL, id);
+        return rowAffected;
     }
 
-    public void addingOfPicturesToTheArticle(ArrayList<Picture> pictures, int articleID) throws SQLException {
-        Connection connection = DBManager.INSTANCE.getConnection();
-
-        String insertPictureSQL = "INSERT INTO pictures (picture_url, article_id) VALUES (?, ?);";
-
-        try (PreparedStatement statement = connection.prepareStatement(insertPictureSQL)) {
-            connection.setAutoCommit(false);
-
-            for (Picture p : pictures) {
-                statement.setString(1, p.getUrlOFPicture());
-                statement.setInt(2, articleID);
-                statement.executeUpdate();
-            }
-
-            connection.commit();
-            System.out.println("Successfully added Of pictures!");
-        } catch (SQLException e) {
-            try {
-                connection.rollback();
-                System.out.println("Unsuccessful attempt to add pictures! " + e.getMessage());
-            } catch (SQLException ex) {
-                throw new SQLException("Unsuccessful connection.rollback()! " + ex.getMessage());
-            }
-        } finally {
-            connection.setAutoCommit(true);
+    @Override
+    public Collection<POJO> allByID(long id) throws SQLException {
+        String allSQL = "SELECT id, picture_url, article_Id FROM pictures WHERE article_Id = ?;";
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(allSQL,id);
+        Collection<POJO> listWithPictures = new ArrayList<>();
+        while (rowSet.next()){
+            listWithPictures.add(this.createPictureByRowSet(rowSet));
         }
-    }
-
-    public ArrayList<Picture> allPicturesToASpecificArticle(int articleID) throws SQLException {
-        Connection connection = DBManager.INSTANCE.getConnection();
-        String allPictures = "SELECT p.id, p.picture_url FROM pictures AS p WHERE article_Id = ?;";
-
-        ArrayList<Picture> listWithPictures = new ArrayList<>();
-        try (PreparedStatement statement = connection.prepareStatement(allPictures)) {
-            statement.setInt(1, articleID);
-            ResultSet row = statement.executeQuery();
-            while (row.next()) {
-                Picture p = new Picture();
-                p.setId(row.getInt("p.id"));
-                p.setUrlOFPicture(row.getString("p.picture_url"));
-                p.setArticleID(articleID);
-                listWithPictures.add(p);
-            }
-        }
-
         return listWithPictures;
+    }
+
+    private Picture createPictureByRowSet(SqlRowSet rowSet) {
+        Picture picture = new Picture();
+        picture.setId(rowSet.getLong("id"));
+        picture.setUrlOFPicture(rowSet.getString("picture_url"));
+        picture.setArticleID(rowSet.getLong("article_Id"));
+        return picture;
+    }
+
+    public boolean existsURLOfPicture(String urlOFPicture) {
+        String searchSQL = "SELECT id FROM pictures WHERE picture_url = ?;";
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(searchSQL, urlOFPicture);
+        return rowSet.next();
     }
 }

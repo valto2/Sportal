@@ -1,31 +1,26 @@
 package example.sportal.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import example.sportal.dao.interfaceDAO.IDAODeleteFromThirdTable;
+import example.sportal.dao.interfaceDAO.IDAOManyToMany;
+import org.springframework.stereotype.Component;
+
 import java.sql.SQLException;
 
-public class ArticlesCategoriesDAO {
+@Component
+public class ArticlesCategoriesDAO extends DAO implements IDAOManyToMany, IDAODeleteFromThirdTable {
 
-    private static ArticlesCategoriesDAO instance = new ArticlesCategoriesDAO();
 
-    private ArticlesCategoriesDAO() {
-    }
-
-    public static ArticlesCategoriesDAO getInstance() {
-        return instance;
-    }
-
-    public void categoryArticle(int categoryID, int articleID) throws SQLException, SQLException {
-        Connection connection = DBManager.INSTANCE.getConnection();
+    @Override
+    public void addInThirdTable(long leftColumn, long rightColumn) throws SQLException {
         String insertCategoryToArticleSQL = "INSERT INTO articles_categories (article_id ,category_id) VALUES (?,?);";
+        this.jdbcTemplate.update(insertCategoryToArticleSQL, leftColumn, rightColumn);
+    }
 
-        try (PreparedStatement statement = connection.prepareStatement(insertCategoryToArticleSQL)) {
-            statement.setInt(1, categoryID);
-            statement.setInt(2, articleID);
-            int rowAffected = statement.executeUpdate();
-
-            String success = rowAffected + " row, successfully added!";
-            System.out.println(success);
-        }
+    @Override
+    public void deleteFromThirdTable(long leftColumn, long rightColumn) throws SQLException {
+        String deleteDislikeSQL =
+                "DELETE FROM articles_categories " +
+                        "WHERE article_id = ? AND category_id = ?;";
+        this.jdbcTemplate.update(deleteDislikeSQL, leftColumn, rightColumn);
     }
 }

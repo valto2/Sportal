@@ -27,8 +27,8 @@ public class CommentDAO {
             preparedStatement.setString(1, comment.getFullCommentText());
             preparedStatement.setTimestamp(2, comment.getTimePosted());
             comment.setArticleID(article.getId());
-            preparedStatement.setInt(3, comment.getArticleID());
-            preparedStatement.setInt(4,  comment.getUserID());
+            preparedStatement.setLong(3, comment.getArticleID());
+            preparedStatement.setLong(4,  comment.getUserID());
             preparedStatement.executeUpdate();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
             resultSet.next();
@@ -49,10 +49,10 @@ public class CommentDAO {
             preparedStatement.setString(1, comment.getFullCommentText());
             preparedStatement.setTimestamp(2, comment.getTimePosted());
             comment.setArticleID(parentComment.getArticleID());
-            preparedStatement.setInt(3, comment.getArticleID());
-            preparedStatement.setInt(4,  comment.getUserID());
+            preparedStatement.setLong(3, comment.getArticleID());
+            preparedStatement.setLong(4,  comment.getUserID());
             comment.setReply_id(parentComment.getId());
-            preparedStatement.setInt(5,  comment.getReply_id());
+            preparedStatement.setLong(5,  comment.getReply_id());
             preparedStatement.executeUpdate();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
             resultSet.next();
@@ -70,7 +70,7 @@ public class CommentDAO {
             String sql = "update comments set full_comment_text = ? where id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, comment.getFullCommentText());
-            preparedStatement.setInt(2, comment.getId());
+            preparedStatement.setLong(2, comment.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new CommentException("Failed to edit comment. Please, try again later.", e);
@@ -92,16 +92,16 @@ public class CommentDAO {
 
                 setForeignKeysToZero(connection);
 
-                deleteFromCommentsStatement.setInt(1, comment.getId());
-                deleteFromCommentsStatement.setInt(2, comment.getId());
+                deleteFromCommentsStatement.setLong(1, comment.getId());
+                deleteFromCommentsStatement.setLong(2, comment.getId());
                 deleteFromCommentsStatement.executeUpdate();
 
                 setForeignKeysToOne(connection);
 
-                deleteFromDislikesStatement.setInt(1, comment.getId());
+                deleteFromDislikesStatement.setLong(1, comment.getId());
                 deleteFromDislikesStatement.executeUpdate();
 
-                deleteFromLikesStatement.setInt(1, comment.getId());
+                deleteFromLikesStatement.setLong(1, comment.getId());
                 deleteFromLikesStatement.executeUpdate();
 
                 connection.commit();
@@ -125,8 +125,8 @@ public class CommentDAO {
                 setForeignKeysToZero(connection);
                 String unlike = "delete from users_liked_comments where user_id = ? and comment_id = ?";
                 PreparedStatement preparedStatement = connection.prepareStatement(unlike);
-                preparedStatement.setInt(1, user.getId());
-                preparedStatement.setInt(2, comment.getId());
+                preparedStatement.setLong(1, user.getId());
+                preparedStatement.setLong(2, comment.getId());
                 preparedStatement.executeUpdate();
                 setForeignKeysToOne(connection);
             }
@@ -136,14 +136,14 @@ public class CommentDAO {
                     String sql = "delete from users_disliked_comments where user_id = ? and comment_id = ?";
                     PreparedStatement preparedStatement = connection.prepareStatement(sql);
                     preparedStatement.setInt(1, user.getId());
-                    preparedStatement.setInt(2, comment.getId());
+                    preparedStatement.setLong(2, comment.getId());
                     preparedStatement.executeUpdate();
                     setForeignKeysToOne(connection);
                 }
                 String like = "insert into users_liked_comments values (? , ?);";
                 PreparedStatement preparedStatement = connection.prepareStatement(like);
                 preparedStatement.setInt(1, user.getId());
-                preparedStatement.setInt(2, comment.getId());
+                preparedStatement.setLong(2, comment.getId());
                 preparedStatement.executeUpdate();
             }
 
@@ -160,7 +160,7 @@ public class CommentDAO {
                 String sql = "delete from users_disliked_comments where user_id = ? and comment_id = ?";
                 PreparedStatement preparedStatement = connection.prepareStatement(sql);
                 preparedStatement.setInt(1, user.getId());
-                preparedStatement.setInt(2, comment.getId());
+                preparedStatement.setLong(2, comment.getId());
                 preparedStatement.executeUpdate();
                 setForeignKeysToOne(connection);
             }
@@ -170,14 +170,14 @@ public class CommentDAO {
                     String unlike = "delete from users_liked_comments where user_id = ? and comment_id = ?";
                     PreparedStatement preparedStatement = connection.prepareStatement(unlike);
                     preparedStatement.setInt(1, user.getId());
-                    preparedStatement.setInt(2, comment.getId());
+                    preparedStatement.setLong(2, comment.getId());
                     preparedStatement.executeUpdate();
                     setForeignKeysToOne(connection);
                 }
                 String dislike = "insert into users_disliked_comments values (? , ?);";
                 PreparedStatement preparedStatement = connection.prepareStatement(dislike);
                 preparedStatement.setInt(1, user.getId());
-                preparedStatement.setInt(2, comment.getId());
+                preparedStatement.setLong(2, comment.getId());
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
@@ -205,7 +205,7 @@ public class CommentDAO {
         String sql = "select * from users_liked_comments where user_id = ? and comment_id = ?;";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setInt(1, user.getId());
-            preparedStatement.setInt(2, comment.getId());
+            preparedStatement.setLong(2, comment.getId());
             ResultSet resultSet = preparedStatement.executeQuery();
             return resultSet.next();
         }
@@ -217,7 +217,7 @@ public class CommentDAO {
         String sql = "select * from users_disliked_comments where user_id = ? and comment_id = ?;";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setInt(1, user.getId());
-            preparedStatement.setInt(2, comment.getId());
+            preparedStatement.setLong(2, comment.getId());
             ResultSet resultSet = preparedStatement.executeQuery();
             return resultSet.next();
         }

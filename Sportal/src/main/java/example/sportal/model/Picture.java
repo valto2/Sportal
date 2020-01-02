@@ -1,32 +1,15 @@
 package example.sportal.model;
 
-public class Picture {
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-    private int id;
+@NoArgsConstructor
+@Getter
+@Setter
+public class Picture implements POJO{
+
+    private long id;
     private String urlOFPicture;
-    private int articleID;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getUrlOFPicture() {
-        return urlOFPicture;
-    }
-
-    public void setUrlOFPicture(String urlOFPicture) {
-        this.urlOFPicture = urlOFPicture;
-    }
-
-    public int getArticleID() {
-        return articleID;
-    }
-
-    public void setArticleID(int articleID) {
-        this.articleID = articleID;
-    }
+    private long articleID;
 }

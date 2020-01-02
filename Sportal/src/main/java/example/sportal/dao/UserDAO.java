@@ -1,6 +1,5 @@
 package example.sportal.dao;
 
-import example.sportal.exceptions.UserException;
 import example.sportal.model.User;
 
 import java.sql.*;

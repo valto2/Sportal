@@ -31,7 +31,7 @@ public class ArticleDAO {
                 statement.setString(2, article.getFullText());
                 statement.setTimestamp(3, article.getCreateDateAndTime());
                 statement.setInt(4, 0);
-                statement.setInt(5, article.getAuthorID());
+                statement.setLong(5, article.getAuthorID());
                 statement.executeUpdate();
                 String success = "Successful added article!";
                 System.out.println(success);

@@ -1,59 +1,35 @@
 package example.sportal.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import example.sportal.dao.interfaceDAO.IDAOAllNumberByID;
+import example.sportal.dao.interfaceDAO.IDAODeleteFromThirdTable;
+import example.sportal.dao.interfaceDAO.IDAOManyToMany;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
+
 import java.sql.SQLException;
 
-public class UsersLikeArticlesDAO {
+@Component
+public class UsersLikeArticlesDAO extends DAO implements IDAOManyToMany, IDAODeleteFromThirdTable, IDAOAllNumberByID {
 
-    private static UsersLikeArticlesDAO instance = new UsersLikeArticlesDAO();
-
-    private UsersLikeArticlesDAO() {
+    @Override
+    public void addInThirdTable(long leftColumn, long rightColumn) throws SQLException {
+        String insertSQL = "INSERT INTO users_like_articles (article_id, user_id) VALUE (?, ?);";
+        this.jdbcTemplate.update(insertSQL,leftColumn,rightColumn);
     }
 
-    public static UsersLikeArticlesDAO getInstance() {
-        return instance;
+    @Override
+    public void deleteFromThirdTable(long leftColumn, long rightColumn) throws SQLException {
+        String deleteSQL = "DELETE FROM users_like_articles WHERE article_id = ? AND user_id = ?;";
+        this.jdbcTemplate.update(deleteSQL,leftColumn,rightColumn);
     }
 
-
-    public void likeArticle(int articleID, int userID) throws SQLException {
-        Connection connection = DBManager.INSTANCE.getConnection();
-        String insertLikeSQL = "INSERT INTO users_like_articles (article_id, user_id) VALUE (?, ?);";
-
-        try (PreparedStatement statement = connection.prepareStatement(insertLikeSQL)) {
-            statement.setInt(1, articleID);
-            statement.setInt(2, userID);
-            statement.executeUpdate();
-            String success = "Successfully added like of article!";
-            System.out.println(success);
+    @Override
+    public int allByID(long id) throws SQLException {
+        String countLikesSQL = "SELECT COUNT(user_id) AS number_likes FROM users_like_articles WHERE article_id = ?;";
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(countLikesSQL, id);
+        if (rowSet.next()) {
+            return rowSet.getInt("number_likes");
         }
-    }
-
-    public void deleteLikeArticle(int articleID, int userID) throws SQLException {
-        Connection connection = DBManager.INSTANCE.getConnection();
-        String deleteLikeSQL = "DELETE FROM users_like_articles WHERE article_id = ? AND user_id = ?;";
-
-        try (PreparedStatement statement = connection.prepareStatement(deleteLikeSQL)) {
-            statement.setInt(1, articleID);
-            statement.setInt(2, userID);
-            int rowAffected = statement.executeUpdate();
-            String success = rowAffected + " row, successfully delete like of article!";
-            System.out.println(success);
-        }
-    }
-
-    public int allLikesForSpecificArticleIDByID(int articleID) throws SQLException {
-        Connection connection = DBManager.INSTANCE.getConnection();
-        String selectLikesSQL = "SELECT COUNT(user_id) FROM users_like_articles WHERE article_id = ?;";
-        int numberOfTheLikesOfAComment = 0;
-        try (PreparedStatement statement = connection.prepareStatement(selectLikesSQL)) {
-            statement.setInt(1, articleID);
-            ResultSet row = statement.executeQuery();
-            if (row.next()){
-                numberOfTheLikesOfAComment = row.getInt(1);
-            }
-        }
-        return numberOfTheLikesOfAComment;
+        return 0;
     }
 }
