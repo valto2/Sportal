@@ -1,35 +1,31 @@
-## DB_login
-DB_login.txt
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**
+!**/src/test/**
 
-##IntelliJ
-out/
-.idea/
-.idea_modules/
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
 *.iml
 *.ipr
-*.iws
 
-## Maven
-target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
-dependency-reduced-pom.xml
-buildNumber.properties
-.mvn/timing.properties
-.mvn/wrapper/maven-wrapper.jar
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
 
-## Java
-.mtj.tmp/
-*.class
-*.jar
-*.war
-*.ear
-*.nar
-hs_err_pid*
-*.log
-
-##Test files
-Test/
+### VS Code ###
+.vscode/
