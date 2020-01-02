@@ -21,7 +21,7 @@ public class ArticleDAO {
     }
 
     public void addArticleFromAdmin(Article article, User user) throws SQLException {
-        if (user.getAdmin()) {
+        if (user.isAdmin()) {
             Connection connection = DBManager.INSTANCE.getConnection();
 
             String insertArticleSQL = "INSERT INTO articles (title ,full_text, date_published, views, author_id) " +
@@ -43,7 +43,7 @@ public class ArticleDAO {
     }
 
     public void editTheTitleOfSpecificArticle(int articleID, User user, String newTitle) throws SQLException {
-        if (user.getAdmin()) {
+        if (user.isAdmin()) {
             Connection connection = DBManager.INSTANCE.getConnection();
 
             String updateArticleTitleSQL = "UPDATE articles SET title = ? WHERE id = ?;";
@@ -61,7 +61,7 @@ public class ArticleDAO {
     }
 
     public void editTheTextOfSpecificArticle(int articleID, User user, String newText) throws SQLException {
-        if (user.getAdmin()) {
+        if (user.isAdmin()) {
             Connection connection = DBManager.INSTANCE.getConnection();
 
             String updateArticleTextSQL = "UPDATE articles SET full_text = ? WHERE id = ?;";
@@ -80,7 +80,7 @@ public class ArticleDAO {
 
     //
     public void deleteArticle(int articleID, User user) throws SQLException {
-        if (user.getAdmin()) {
+        if (user.isAdmin()) {
             Connection connection = DBManager.INSTANCE.getConnection();
             String deleteCommentSQL = "DELETE FROM articles WHERE id = ?;";
             try (PreparedStatement statement = connection.prepareStatement(deleteCommentSQL)) {

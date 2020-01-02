@@ -93,7 +93,7 @@ public class CategoryDAO {
     }
 
     public void deleteCategory(int categoryID, User user) throws SQLException {
-        if (user.getAdmin()){
+        if (user.isAdmin()){
             Connection connection = DBManager.INSTANCE.getConnection();
             String deleteCommentSQL= "DELETE FROM categories WHERE id = ?;";
             try (PreparedStatement statement = connection.prepareStatement(deleteCommentSQL)) {

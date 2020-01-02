@@ -25,7 +25,7 @@ public class CommentDAO {
                     "(?,?,?,?);";
             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, comment.getFullCommentText());
-            preparedStatement.setTimestamp(2, Timestamp.valueOf(comment.getTimePosted()));
+            preparedStatement.setTimestamp(2, comment.getTimePosted());
             comment.setArticleID(article.getId());
             preparedStatement.setInt(3, comment.getArticleID());
             preparedStatement.setInt(4,  comment.getUserID());
@@ -47,7 +47,7 @@ public class CommentDAO {
                     "(?,?,?,?,?);";
             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, comment.getFullCommentText());
-            preparedStatement.setTimestamp(2, Timestamp.valueOf(comment.getTimePosted()));
+            preparedStatement.setTimestamp(2, comment.getTimePosted());
             comment.setArticleID(parentComment.getArticleID());
             preparedStatement.setInt(3, comment.getArticleID());
             preparedStatement.setInt(4,  comment.getUserID());
