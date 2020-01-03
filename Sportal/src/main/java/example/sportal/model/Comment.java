@@ -16,5 +16,5 @@ public class Comment {
     private Timestamp timePosted;
     private long userID;
     private long articleID;
-    private long reply_id; // add in DB
+    private long reply_id;
 }
