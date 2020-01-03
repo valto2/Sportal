@@ -1,188 +1,152 @@
 package example.sportal.dao;
 
+import example.sportal.dao.interfaceDAO.IDAOAllInfo;
+import example.sportal.dao.interfaceDAO.IDAODeleteByID;
 import example.sportal.model.Article;
-import example.sportal.model.User;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-public class ArticleDAO {
+@Component
+public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo {
 
-    private static ArticleDAO instance = new ArticleDAO();
-
-    private ArticleDAO() {
+    public void addArticle(Article article) throws SQLException {
+        String insertArticleSQL =
+                "INSERT INTO articles (title ,full_text, date_published, views, author_id) VALUES (?, ?, ?, ?, ?);";
+        Timestamp createDateAndTime = Timestamp.valueOf(LocalDateTime.now());
+        this.jdbcTemplate.update(
+                insertArticleSQL,
+                article.getTitle(), article.getFullText(), createDateAndTime, 0, article.getAuthorID());
     }
 
-    public static ArticleDAO getInstance() {
-        return instance;
-    }
-
-    public void addArticleFromAdmin(Article article, User user) throws SQLException {
-        if (user.isAdmin()) {
-            Connection connection = DBManager.INSTANCE.getConnection();
-
-            String insertArticleSQL = "INSERT INTO articles (title ,full_text, date_published, views, author_id) " +
-                    "VALUES (?, ?, ?, ?, ?);";
-            try (PreparedStatement statement = connection.prepareStatement(insertArticleSQL)) {
-                statement.setString(1, article.getTitle());
-                statement.setString(2, article.getFullText());
-                statement.setTimestamp(3, article.getCreateDateAndTime());
-                statement.setInt(4, 0);
-                statement.setLong(5, article.getAuthorID());
-                statement.executeUpdate();
-                String success = "Successful added article!";
-                System.out.println(success);
-            }
-        } else {
-            String message = "You are not admin!";
-            System.out.println(message);
-        }
-    }
-
-    public void editTheTitleOfSpecificArticle(int articleID, User user, String newTitle) throws SQLException {
-        if (user.isAdmin()) {
-            Connection connection = DBManager.INSTANCE.getConnection();
-
-            String updateArticleTitleSQL = "UPDATE articles SET title = ? WHERE id = ?;";
-            try (PreparedStatement statement = connection.prepareStatement(updateArticleTitleSQL)) {
-                statement.setInt(2, articleID);
-                statement.setString(1, newTitle);
-                int rowAffected = statement.executeUpdate();
-                String success = rowAffected + " row, successful edited title of the article!";
-                System.out.println(success);
-            }
-        } else {
-            String message = "You are not admin or article not exists!";
-            System.out.println(message);
-        }
-    }
-
-    public void editTheTextOfSpecificArticle(int articleID, User user, String newText) throws SQLException {
-        if (user.isAdmin()) {
-            Connection connection = DBManager.INSTANCE.getConnection();
-
-            String updateArticleTextSQL = "UPDATE articles SET full_text = ? WHERE id = ?;";
-            try (PreparedStatement statement = connection.prepareStatement(updateArticleTextSQL)) {
-                statement.setInt(2, articleID);
-                statement.setString(1, newText);
-                int rowAffected = statement.executeUpdate();
-                String affected = rowAffected + " row, successful edited text of the article!";
-                System.out.println(affected);
-            }
-        } else {
-            String message = "You are not admin!";
-            System.out.println(message);
-        }
-    }
-
-    //
-    public void deleteArticle(int articleID, User user) throws SQLException {
-        if (user.isAdmin()) {
-            Connection connection = DBManager.INSTANCE.getConnection();
-            String deleteCommentSQL = "DELETE FROM articles WHERE id = ?;";
-            try (PreparedStatement statement = connection.prepareStatement(deleteCommentSQL)) {
-                statement.setInt(1, articleID);
-                int rowAffected = statement.executeUpdate();
-                String success = rowAffected + " row, successful delete article!";
-                System.out.println(success);
-            }
-        } else {
-            String message = "You are not admin or article not exists!";
-            System.out.println(message);
-        }
-    }
-
-    public void addViewOfSpecificArticle(int articleID) throws SQLException {
-        Connection connection = DBManager.INSTANCE.getConnection();
-
+    public void addViewOfSpecificArticleID(long articleID) throws SQLException {
         String updateViewsSQL = "UPDATE articles SET views = views + 1 WHERE id = ?;";
-
-        try (PreparedStatement statement = connection.prepareStatement(updateViewsSQL)) {
-            statement.setInt(1, articleID);
-            int rowAffected = statement.executeUpdate();
-            String success = rowAffected + " row, successfully added view of article!";
-            System.out.println(success);
-        }
+        this.jdbcTemplate.update(updateViewsSQL, articleID);
     }
 
-    public ArrayList<Article> allArticleByTitleOrCategory(String titleOrCategory) throws SQLException {
-        Connection connection = DBManager.INSTANCE.getConnection();
+    public Article articleByTitle(String title) throws SQLException {
+        String searchSQL =
+                "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id, u.user_name " +
+                        "FROM articles AS a " +
+                        "LEFT JOIN users AS u ON a.author_id = u.id " +
+                        "WHERE a.title = ?;";
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(searchSQL, title);
+        if (rowSet.next()) {
+            return this.rowSetCreateArticle(rowSet);
+        }
+        return null;
+    }
 
-        String findAllArticleSQL = "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id " +
-                "FROM articles AS a " +
-                "JOIN articles_categories AS aa ON a.id = aa.article_id " +
-                "JOIN categories AS c ON aa.category_id = c.id " +
-                "WHERE c.category_name LIKE ? " +
-                "UNION " +
-                "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id " +
-                "FROM articles AS a " +
-                "WHERE a.title LIKE ?;";
-        ArrayList<Article> listWithArticles = new ArrayList<>();
-        try (PreparedStatement statement = connection.prepareStatement(findAllArticleSQL)) {
-            statement.setString(1, titleOrCategory + "%");
-            statement.setString(2, titleOrCategory + "%");
-            ResultSet row = statement.executeQuery();
-            while (row.next()) {
-                Article article = new Article();
-                article.setId(row.getInt(1));
-                article.setTitle(row.getString(2));
-                article.setFullText(row.getString(3));
-                article.setCreateDateAndTime(row.getTimestamp(4));
-                article.setViews(row.getInt(5));
-                article.setAuthorID(row.getInt(6));
+    private Article rowSetCreateArticle(SqlRowSet rowSet) {
+        Article article = new Article();
+        article.setId(rowSet.getLong("id"));
+        article.setTitle(rowSet.getString("title"));
+        article.setFullText(rowSet.getString("full_text"));
+        article.setCreateDateAndTime(rowSet.getTimestamp("date_published"));
+        article.setViews(rowSet.getInt("views") + 1);
+        article.setAuthorID(rowSet.getLong("author_id"));
+        if (rowSet.getString("user_name") != null) {
+            article.setAuthorName(rowSet.getString("user_name"));
+        }
+        return article;
+    }
 
-                listWithArticles.add(article);
-            }
+    public List<String> allArticleByTitleOrCategory(String titleOrCategory) throws SQLException {
+        String findAllTitleOfArticleSQL =
+                "SELECT a.title " +
+                        "FROM articles AS a " +
+                        "JOIN articles_categories AS aa ON a.id = aa.article_id " +
+                        "JOIN categories AS c ON aa.category_id = c.id " +
+                        "WHERE c.category_name LIKE ? " +
+                        "UNION " +
+                        "SELECT a.title " +
+                        "FROM articles AS a " +
+                        "WHERE a.title LIKE ?;";
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(findAllTitleOfArticleSQL,
+                titleOrCategory + "%", titleOrCategory + "%");
+        List<String> listWithTitleOfArticles = new ArrayList();
+        while (rowSet.next()) {
+            listWithTitleOfArticles.add(rowSet.getString("title"));
+        }
+        return listWithTitleOfArticles;
+    }
+
+    public List<Article> topFiveMostViewedArticlesForToday() throws SQLException {
+        String topFiveMostViewedArticleSQL =
+                "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id, u.user_name " +
+                        "FROM articles AS a " +
+                        "LEFT JOIN users AS u ON a.author_id = u.id " +
+                        "WHERE DATE(a.date_published) = CURRENT_DATE() " +
+                        "ORDER BY a.views DESC LIMIT 5;";
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(topFiveMostViewedArticleSQL);
+        List<Article> listWithArticles = new ArrayList<>();
+        while (rowSet.next()) {
+            listWithArticles.add(this.rowSetCreateArticle(rowSet));
         }
         return listWithArticles;
     }
 
-    public String theAuthorNameOfSpecificArticle(int articleID) throws SQLException {
-        String authorName = null;
-        Connection connection = DBManager.INSTANCE.getConnection();
+    public List<Article> allArticlesToASpecificCategory(String categoryName) throws SQLException {
+        String allArticles =
+                "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id, u.user_name " +
+                        "FROM articles AS a " +
+                        "LEFT JOIN users AS u ON a.author_id = u.id " +
+                        "JOIN articles_categories AS aa ON a.id = aa.article_id " +
+                        "JOIN categories AS c ON aa.category_id = c.id " +
+                        "WHERE c.category_name = ?;";
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(allArticles, categoryName);
+        List<Article> listWithArticles = new ArrayList<>();
+        while (rowSet.next()) {
+            listWithArticles.add(this.rowSetCreateArticle(rowSet));
+        }
+        return listWithArticles;
+    }
 
-        String findAuthorByArticleIdSQL = "SELECT u.user_name " +
-                "FROM users AS u " +
-                "JOIN  articles AS a ON u.id = a.author_id " +
+    public void editTheTitleOfSpecificArticle(int articleID, String newTitle) throws SQLException {
+        String updateArticleTitleSQL = "UPDATE articles SET title = ? WHERE id = ?;";
+        this.jdbcTemplate.update(updateArticleTitleSQL, newTitle, articleID);
+    }
+
+    public void editTheTextOfSpecificArticle(int articleID, String newText) throws SQLException {
+        String updateArticleTextSQL = "UPDATE articles SET full_text = ? WHERE id = ?;";
+        this.jdbcTemplate.update(updateArticleTextSQL, newText, articleID);
+    }
+
+    // todo delete article, delete and picture and categories to article
+    @Override
+    public int deleteByID(long id) throws SQLException {
+        this.setFKFalse();
+        String deleteSQL = "DELETE FROM articles WHERE id = ?;";
+        int rowAffected = this.jdbcTemplate.update(deleteSQL, id);
+        this.setFKTrue();
+        return rowAffected;
+    }
+
+    public Article articleByID(long articleID) {
+        String searchSQL = "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id,  u.user_name " +
+                "FROM articles AS a " +
+                "LEFT JOIN users AS u ON a.author_id = u.id " +
                 "WHERE a.id = ?;";
-
-        try (PreparedStatement statement = connection.prepareStatement(findAuthorByArticleIdSQL)) {
-            statement.setInt(1, articleID);
-            ResultSet row = statement.executeQuery();
-            if (row.next()) {
-                authorName = row.getString("u.user_name");
-                System.out.println("Successfully found of author!");
-            }
-
-            return authorName;
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(searchSQL, articleID);
+        if (rowSet.next()) {
+            return this.rowSetCreateArticle(rowSet);
         }
+        return null;
     }
 
-    public ArrayList<Article> topFiveMostViewedArticlesForToday() throws SQLException {
-        Connection connection = DBManager.INSTANCE.getConnection();
-
-        String topFiveMostViewedArticleSQL = "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id " +
-                "FROM articles AS a " +
-                "WHERE DATE(a.date_published) = CURRENT_DATE() " +
-                "ORDER BY a.views DESC LIMIT 5;";
-        ArrayList<Article> listWithArticles = new ArrayList<>();
-        try (PreparedStatement statement = connection.prepareStatement(topFiveMostViewedArticleSQL)) {
-            ResultSet row = statement.executeQuery();
-            while (row.next()) {
-                Article article = new Article();
-                article.setId(row.getInt("a.id"));
-                article.setTitle(row.getString("a.title"));
-                article.setFullText(row.getString("a.full_text"));
-                article.setCreateDateAndTime(row.getTimestamp("a.date_published"));
-                article.setViews(row.getInt("a.views"));
-                article.setAuthorID(row.getInt("a.author_id"));
-
-                listWithArticles.add(article);
-            }
+    @Override
+    public Collection<Object> all() throws SQLException {
+        String findAllTitleOfArticleSQL = "SELECT title FROM articles;";
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(findAllTitleOfArticleSQL);
+        Collection<Object> listWithTitle = new ArrayList();
+        while (rowSet.next()) {
+            listWithTitle.add(rowSet.getString("title"));
         }
-        return listWithArticles;
+        return listWithTitle;
     }
 }

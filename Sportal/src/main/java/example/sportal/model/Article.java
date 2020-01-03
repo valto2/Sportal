@@ -16,5 +16,6 @@ public class Article {
     private String fullText;
     private Timestamp createDateAndTime;
     private int views;
+    private String authorName;
     private long authorID;
 }

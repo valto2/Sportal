@@ -1,5 +1,6 @@
 package example.sportal.dao;
 
+import example.sportal.dao.interfaceDAO.IDAOAllInfo;
 import example.sportal.dao.interfaceDAO.IDAOAllPOJOByID;
 import example.sportal.dao.interfaceDAO.IDAODeleteByID;
 import example.sportal.model.Category;
@@ -10,10 +11,9 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @Component
-public class CategoryDAO extends DAO implements IDAODeleteByID, IDAOAllPOJOByID {
+public class CategoryDAO extends DAO implements IDAODeleteByID, IDAOAllPOJOByID, IDAOAllInfo {
 
 
     public void addingCategory(String category) throws SQLException {
@@ -38,16 +38,6 @@ public class CategoryDAO extends DAO implements IDAODeleteByID, IDAOAllPOJOByID 
         return listWithCategories;
     }
 
-    public List<Category> allCategories() throws SQLException{
-        String allCategories = "SELECT id, category_name FROM categories;";
-        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(allCategories);
-        List<Category> listWithCategories = new ArrayList<>();
-        while (rowSet.next()) {
-            listWithCategories.add(this.createCategoryByRowSet(rowSet));
-        }
-        return listWithCategories;
-    }
-
     private Category createCategoryByRowSet(SqlRowSet rowSet){
         Category category = new Category();
         category.setId(rowSet.getInt("id"));
@@ -59,5 +49,16 @@ public class CategoryDAO extends DAO implements IDAODeleteByID, IDAOAllPOJOByID 
     public int deleteByID(long id) throws SQLException {
         String deleteCategorySQL= "DELETE FROM categories WHERE id = ?;";
         return this.jdbcTemplate.update(deleteCategorySQL,id);
+    }
+
+    @Override
+    public Collection<Object> all() throws SQLException {
+        String allCategories = "SELECT id, category_name FROM categories;";
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(allCategories);
+        Collection<Object> listWithCategories = new ArrayList<>();
+        while (rowSet.next()) {
+            listWithCategories.add(this.createCategoryByRowSet(rowSet));
+        }
+        return listWithCategories;
     }
 }

@@ -19,7 +19,7 @@ public class ArticlesCategoriesDAO extends DAO implements IDAOManyToMany, IDAODe
     @Override
     public void deleteFromThirdTable(long leftColumn, long rightColumn) throws SQLException {
         String deleteDislikeSQL =
-                "DELETE FROM articles_categories " +
+                        "DELETE FROM articles_categories " +
                         "WHERE article_id = ? AND category_id = ?;";
         this.jdbcTemplate.update(deleteDislikeSQL, leftColumn, rightColumn);
     }
