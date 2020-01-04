@@ -16,13 +16,13 @@ public class UsersLikeArticlesDAO extends DAO
     @Override
     public void addInThirdTable(long leftColumn, long rightColumn) throws SQLException {
         String insertSQL = "INSERT INTO users_like_articles (article_id, user_id) VALUE (?, ?);";
-        this.jdbcTemplate.update(insertSQL, leftColumn, rightColumn);
+        this.jdbcTemplate.update(insertSQL,leftColumn,rightColumn);
     }
 
     @Override
     public void deleteFromThirdTable(long leftColumn, long rightColumn) throws SQLException {
         String deleteSQL = "DELETE FROM users_like_articles WHERE article_id = ? AND user_id = ?;";
-        this.jdbcTemplate.update(deleteSQL, leftColumn, rightColumn);
+        this.jdbcTemplate.update(deleteSQL,leftColumn,rightColumn);
     }
 
     @Override

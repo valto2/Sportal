@@ -30,11 +30,11 @@ public class ArticlesController {
         }
         long userID = (long) session.getAttribute("userID");
         Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-        if (!isAdmin){
+        if (!isAdmin) {
             response.setStatus(400);
             return new Gson().toJson(WRONG_INFORMATION);
         }
-        if (article.getTitle().isEmpty() || article.getFullText().isEmpty()){
+        if (article.getTitle().isEmpty() || article.getFullText().isEmpty()) {
             response.setStatus(400);
             return new Gson().toJson(WRONG_INFORMATION);
         }
@@ -49,11 +49,11 @@ public class ArticlesController {
                                            HttpSession session) throws SQLException {
         title = title.replace("_", " ");
         Article article = this.articlesDAO.articleByTitle(title);
-        if (article == null){
+        if (article == null) {
             response.setStatus(404);
             return new Gson().toJson(NOT_EXISTS_OBJECT);
         }
-        if (article.getAuthorName() == null){
+        if (article.getAuthorName() == null) {
             article.setAuthorName(COPYRIGHT);
         }
         this.articlesDAO.addViewOfSpecificArticleID(article.getId());
@@ -66,7 +66,7 @@ public class ArticlesController {
                                           HttpServletResponse response) throws SQLException {
         titleOrCategory = titleOrCategory.replace("_", " ");
         List<String> listOfAllTittleOfArticles = this.articlesDAO.allArticleByTitleOrCategory(titleOrCategory);
-        if (listOfAllTittleOfArticles.isEmpty()){
+        if (listOfAllTittleOfArticles.isEmpty()) {
             response.setStatus(404);
             return new Gson().toJson(NOT_EXISTS_OBJECT);
         }
@@ -76,29 +76,17 @@ public class ArticlesController {
     @GetMapping(value = "/articles/top_5_view_articles")
     public String topFiveViewedArticlesToday(HttpServletResponse response) throws SQLException {
         List<Article> listOfArticles = this.articlesDAO.topFiveMostViewedArticlesForToday();
-        if (listOfArticles.isEmpty()){
+        if (listOfArticles.isEmpty()) {
             response.setStatus(404);
             return new Gson().toJson(NOT_EXISTS_OBJECT);
         }
         return new Gson().toJson(listOfArticles);
     }
 
-    @GetMapping(value = "/articles/category/{categoryName}")
-    public String articleFromSpecificCategory(@PathVariable("categoryName") String category,
-                                              HttpServletResponse response) throws SQLException {
-        category = category.replace("_", " ");
-        List<Article> ListOfArticles = this.articlesDAO.allArticlesToASpecificCategory(category);
-        if (ListOfArticles.isEmpty()){
-            response.setStatus(404);
-            return new Gson().toJson(NOT_EXISTS_OBJECT);
-        }
-        return new Gson().toJson(ListOfArticles);
-    }
-
     @GetMapping(value = "/articles/all_title")
     public String getAllTitleOfArticles(HttpServletResponse response) throws SQLException {
         Collection listOfTitle = this.articlesDAO.all();
-        if (listOfTitle.isEmpty()){
+        if (listOfTitle.isEmpty()) {
             response.setStatus(404);
             return NOT_EXISTS_OBJECT;
         }

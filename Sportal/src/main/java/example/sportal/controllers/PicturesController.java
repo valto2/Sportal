@@ -47,13 +47,10 @@ public class PicturesController {
         return new Gson().toJson("Successful added picture to article!");
     }
 
-    @GetMapping(value = "/all/pictures_of_article")
-    public String getAllPictureByArticleTitle(HttpServletResponse response,
+    @GetMapping(value = "/all/pictures_of_article/{article_id}")
+    public String getAllPictureByArticleTitle(@PathVariable(name = "article_id") Long articleID,
+                                              HttpServletResponse response,
                                               HttpSession session) throws SQLException, IOException {
-        if (session.getAttribute("articleID") == null){
-            response.sendRedirect("/all_categories");
-        }
-        long articleID = (long) session.getAttribute("articleID");
         Collection<POJO> listFromPictures = this.picturesDAO.allByID(articleID);
         if (listFromPictures.isEmpty()){
             response.setStatus(404);

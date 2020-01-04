@@ -1,8 +1,10 @@
 package example.sportal.dao;
 
 import example.sportal.dao.interfaceDAO.IDAOAllInfo;
+import example.sportal.dao.interfaceDAO.IDAOAllPOJOByID;
 import example.sportal.dao.interfaceDAO.IDAODeleteByID;
 import example.sportal.model.Article;
+import example.sportal.model.POJO;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Component
-public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo {
+public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo, IDAOAllPOJOByID {
 
     public void addArticle(Article article) throws SQLException {
         String insertArticleSQL =
@@ -140,13 +142,30 @@ public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo {
     }
 
     @Override
-    public Collection<Object> all() throws SQLException {
+    public Collection<String> all() throws SQLException {
         String findAllTitleOfArticleSQL = "SELECT title FROM articles;";
         SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(findAllTitleOfArticleSQL);
-        Collection<Object> listWithTitle = new ArrayList();
+        Collection<String> listWithTitle = new ArrayList();
         while (rowSet.next()) {
             listWithTitle.add(rowSet.getString("title"));
         }
         return listWithTitle;
+    }
+
+    @Override
+    public Collection<POJO> allByID(long id) throws SQLException {
+        String allArticles =
+                "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id, u.user_name " +
+                        "FROM articles AS a " +
+                        "LEFT JOIN users AS u ON a.author_id = u.id " +
+                        "JOIN articles_categories AS aa ON a.id = aa.article_id " +
+                        "JOIN categories AS c ON aa.category_id = c.id " +
+                        "WHERE c.id = ?;";
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(allArticles, id);
+        Collection<POJO> listWithArticles = new ArrayList<>();
+        while (rowSet.next()) {
+            listWithArticles.add(this.rowSetCreateArticle(rowSet));
+        }
+        return listWithArticles;
     }
 }

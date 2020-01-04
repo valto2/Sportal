@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Article {
+public class Article implements POJO{
 
     private long id;
     private String title;

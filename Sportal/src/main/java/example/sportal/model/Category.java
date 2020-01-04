@@ -10,5 +10,5 @@ import lombok.Setter;
 public class Category implements POJO {
 
     private int id;
-    private String category;
+    private String categoryName;
 }

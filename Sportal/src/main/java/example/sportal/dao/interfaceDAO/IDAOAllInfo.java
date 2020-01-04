@@ -5,5 +5,5 @@ import java.util.Collection;
 
 public interface IDAOAllInfo {
 
-    Collection<Object> all()throws SQLException;
+    Collection<String> all()throws SQLException;
 }
