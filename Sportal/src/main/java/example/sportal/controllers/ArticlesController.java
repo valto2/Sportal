@@ -40,7 +40,7 @@ public class ArticlesController {
         }
         article.setAuthorID(userID);
         this.articlesDAO.addArticle(article);
-        return new Gson().toJson("Successful added article!");
+        return "Successful added article!";
     }
 
     @GetMapping(value = "/articles/{title}")
@@ -75,7 +75,7 @@ public class ArticlesController {
 
     @GetMapping(value = "/articles/top_5_view_articles")
     public String topFiveViewedArticlesToday(HttpServletResponse response) throws SQLException {
-        List<Article> listOfArticles = this.articlesDAO.topFiveMostViewedArticlesForToday();
+        List<String> listOfArticles = this.articlesDAO.topFiveMostViewedArticlesForToday();
         if (listOfArticles.isEmpty()) {
             response.setStatus(404);
             return new Gson().toJson(NOT_EXISTS_OBJECT);
