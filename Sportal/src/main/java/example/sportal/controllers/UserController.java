@@ -44,7 +44,7 @@ public class UserController {
             if (user != null && user.getPassword().equals(password)) {
                 session.setAttribute("userId", user.getId());
                 model.addAttribute("msg", "success");
-                if (user.isAdmin()) {
+                if (user.getIsAdmin()) {
                     return "admin";
                 }
                 return "home";

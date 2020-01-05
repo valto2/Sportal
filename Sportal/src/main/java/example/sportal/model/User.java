@@ -7,7 +7,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-
 public class User {
 
 
@@ -15,7 +14,7 @@ public class User {
     private String username;
     private String email;
     private String password;
-    private boolean isAdmin;
+    private Boolean isAdmin;
 
 
     public User(String username, String email, String password) {
@@ -24,7 +23,7 @@ public class User {
         this.password = password;
     }
 
-    public User(Integer id, String username, String password, String email, boolean isAdmin) {
+    public User(Integer id, String username, String password, String email, Boolean isAdmin) {
         this.id = id;
         this.username = username;
         this.password = password;
