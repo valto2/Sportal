@@ -69,7 +69,6 @@ public class ArticlesCategoriesDAO extends DAO
         while (rowSet.next()) {
             listWithCategories.add(this.createCategoryByRowSet(rowSet));
         }
-
         return listWithCategories;
     }
 

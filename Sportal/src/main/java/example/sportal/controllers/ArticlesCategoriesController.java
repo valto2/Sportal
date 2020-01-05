@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import example.sportal.dao.ArticlesCategoriesDAO;
 import example.sportal.model.Category;
 import example.sportal.model.POJO;
+import example.sportal.model.PageOfArticle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,18 +66,14 @@ public class ArticlesCategoriesController {
         return new Gson().toJson(ListFromTitleOfArticles);
     }
 
-    @GetMapping(value = "/all/categories_of_articleID")
-    public String getAllCategoriesByArticleTitle(HttpServletResponse response,
-                                                 HttpSession session) throws SQLException, IOException {
-        if (session.getAttribute("articleID") == null) {
-            response.sendRedirect("/articles/all_title");
-        }
-        long articleID = (long) session.getAttribute("articleID");
-        Collection<POJO> listFromNameOfCategories = this.articlesCategoriesDAO.allCategoriesByArticlesID(articleID);
-        if (listFromNameOfCategories.isEmpty()) {
-            response.setStatus(404);
-            return new Gson().toJson(NOT_EXISTS_OBJECT);
-        }
-        return new Gson().toJson(listFromNameOfCategories);
+    @GetMapping(value = "/all/categories_of_articleID/{article_id}")
+    public void getAllCategoriesByArticleTitle(@PathVariable(name = "article_id") Long articleID,
+                                               HttpServletResponse response,
+                                               HttpSession session) throws SQLException, IOException {
+        Collection<POJO> listFromCategories = this.articlesCategoriesDAO.allCategoriesByArticlesID(articleID);
+        PageOfArticle pageOfArticle = (PageOfArticle) session.getAttribute("pageOfArticle");
+        pageOfArticle.setCategories(listFromCategories);
+        session.setAttribute("pageOfArticle", pageOfArticle);
+        response.sendRedirect("/all/pictures_of_article/" + articleID);
     }
 }

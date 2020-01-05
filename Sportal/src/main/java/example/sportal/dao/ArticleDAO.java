@@ -100,7 +100,6 @@ public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo {
         this.jdbcTemplate.update(updateArticleTextSQL, newText, articleID);
     }
 
-    // todo delete article, delete and picture and categories to article
     @Override
     public int deleteByID(long id) throws SQLException {
         this.setFKFalse();

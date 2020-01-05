@@ -3,6 +3,7 @@ package example.sportal.controllers;
 import com.google.gson.Gson;
 import example.sportal.dao.PictureDAO;
 import example.sportal.model.POJO;
+import example.sportal.model.PageOfArticle;
 import example.sportal.model.Picture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,7 @@ public class PicturesController {
             return new Gson().toJson(WRONG_INFORMATION);
         }
         if (session.getAttribute("articleID") == null){
-            response.sendRedirect("/all_categories");
+            response.sendRedirect("/all_categories_name");
         }
         long articleID = (long) session.getAttribute("articleID");
         boolean checkURLOfPictureExists = this.picturesDAO.existsURLOfPicture(picture.getUrlOFPicture());
@@ -48,14 +49,13 @@ public class PicturesController {
     }
 
     @GetMapping(value = "/all/pictures_of_article/{article_id}")
-    public String getAllPictureByArticleTitle(@PathVariable(name = "article_id") Long articleID,
-                                              HttpServletResponse response,
-                                              HttpSession session) throws SQLException, IOException {
+    public void getAllPictureByArticleTitle(@PathVariable(name = "article_id") Long articleID,
+                                            HttpServletResponse response,
+                                            HttpSession session) throws SQLException, IOException {
         Collection<POJO> listFromPictures = this.picturesDAO.allByID(articleID);
-        if (listFromPictures.isEmpty()){
-            response.setStatus(404);
-            return new Gson().toJson(NOT_EXISTS_OBJECT);
-        }
-        return new Gson().toJson(listFromPictures);
+        PageOfArticle pageOfArticle = (PageOfArticle) session.getAttribute("pageOfArticle");
+        pageOfArticle.setPictures(listFromPictures);
+        session.setAttribute("pageOfArticle", pageOfArticle);
+        response.sendRedirect("/all/comment_of_article/" + articleID);
     }
 }

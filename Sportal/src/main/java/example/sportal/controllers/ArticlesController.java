@@ -3,6 +3,7 @@ package example.sportal.controllers;
 import com.google.gson.Gson;
 import example.sportal.dao.ArticleDAO;
 import example.sportal.model.Article;
+import example.sportal.model.PageOfArticle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,25 +41,28 @@ public class ArticlesController {
         }
         article.setAuthorID(userID);
         this.articlesDAO.addArticle(article);
-        return "Successful added article!";
+        return new Gson().toJson("Successful added article!");
     }
 
     @GetMapping(value = "/articles/{title}")
-    public String articleFromSpecificTitle(@PathVariable("title") String title,
-                                           HttpServletResponse response,
-                                           HttpSession session) throws SQLException {
+    public void articleFromSpecificTitle(@PathVariable("title") String title,
+                                         HttpServletResponse response,
+                                         HttpSession session) throws SQLException, IOException {
         title = title.replace("_", " ");
         Article article = this.articlesDAO.articleByTitle(title);
         if (article == null) {
             response.setStatus(404);
-            return new Gson().toJson(NOT_EXISTS_OBJECT);
+            response.getWriter().append(NOT_EXISTS_OBJECT);
         }
         if (article.getAuthorName() == null) {
             article.setAuthorName(COPYRIGHT);
         }
         this.articlesDAO.addViewOfSpecificArticleID(article.getId());
         session.setAttribute("articleID", article.getId());
-        return new Gson().toJson(article);
+        PageOfArticle pageOfArticle = new PageOfArticle();
+        pageOfArticle.setArticle(article);
+        session.setAttribute("pageOfArticle", pageOfArticle);
+        response.sendRedirect("/all/categories_of_articleID/" + article.getId());
     }
 
     @GetMapping(value = "/articles/all_articles_by_title_or_category/{text}")
