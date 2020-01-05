@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Controller
+@RestController
 public class UserController {
 
     @GetMapping("/index")
@@ -30,21 +30,22 @@ public class UserController {
 
     //login
     @PostMapping("/login")
-    public String login(@RequestParam String email,
-                        @RequestParam String password,
+    public String login(@RequestBody User user,
                         Model model,
                         HttpSession session) {
 
-        if (!UserValidations.isEMailValid(email)) {
+        if (!UserValidations.isEMailValid(user.getEmail())) {
             model.addAttribute("error", "E-mail address is not valid!");
             return "login";
         }
         try {
-            User user = UserDAO.getInstance().getUserByEmail(email);
-            if (user != null && user.getPassword().equals(password)) {
-                session.setAttribute("userId", user.getId());
+            User loginUser = UserDAO.getInstance().getUserByEmail(user.getEmail());
+            if (loginUser != null && loginUser.getPassword().equals(user.getPassword())) {
+                session.setAttribute("userID", loginUser.getId());
+                session.setAttribute("isAdmin", loginUser.getIsAdmin());
                 model.addAttribute("msg", "success");
-                if (user.getIsAdmin()) {
+                System.out.println(loginUser.toString());
+                if (loginUser.getIsAdmin()) {
                     return "admin";
                 }
                 return "home";

@@ -46,7 +46,7 @@ public class UserDAO implements IUserDAO {
     @Override
     public User getUserByEmail(String email) throws SQLException {
         Connection connection = DBManager.getInstance().getConnection();
-        String sql = "SELECT * FROM users WHERE email = ?;";
+        String sql = "SELECT * FROM users WHERE user_email = ?;";
         User user = null;
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, email);
