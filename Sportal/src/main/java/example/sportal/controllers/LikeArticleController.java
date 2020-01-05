@@ -20,7 +20,7 @@ public class LikeArticleController {
     public String likeArticle(HttpServletResponse response,
                               HttpSession session) throws IOException, SQLException {
         if (session.getAttribute("userID") == null) {
-            response.sendRedirect("LoginForm.html");
+            response.sendRedirect("/user/loginForm");
         }
         long userID = (long) session.getAttribute("userID");
         if (session.getAttribute("articleID") == null) {
@@ -30,8 +30,10 @@ public class LikeArticleController {
         if (this.likeArticlesDAO.existsInThirdTable(articleID, userID)) {
             return new Gson().toJson("Without more likes from you on this article!");
         }
-        this.likeArticlesDAO.addInThirdTable(articleID, userID);
-        return new Gson().toJson("Likes article!");
+        if(this.likeArticlesDAO.addInThirdTable(articleID, userID)){
+            return "Likes article!";
+        }
+        return "Please try again!";
     }
 
     @GetMapping(value = "/all_like/article")

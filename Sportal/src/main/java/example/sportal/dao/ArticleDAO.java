@@ -33,18 +33,18 @@ public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo, IDAO
 
     public Article articleByTitle(String title) throws SQLException {
         String searchSQL =
-                "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id, u.user_name " +
+                        "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id, u.user_name " +
                         "FROM articles AS a " +
                         "LEFT JOIN users AS u ON a.author_id = u.id " +
                         "WHERE a.title = ?;";
         SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(searchSQL, title);
         if (rowSet.next()) {
-            return this.rowSetCreateArticle(rowSet);
+            return this.createArticleByRowSet(rowSet);
         }
         return null;
     }
 
-    private Article rowSetCreateArticle(SqlRowSet rowSet) {
+    private Article createArticleByRowSet(SqlRowSet rowSet) {
         Article article = new Article();
         article.setId(rowSet.getLong("id"));
         article.setTitle(rowSet.getString("title"));
@@ -60,7 +60,7 @@ public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo, IDAO
 
     public List<String> allArticleByTitleOrCategory(String titleOrCategory) throws SQLException {
         String findAllTitleOfArticleSQL =
-                "SELECT a.title " +
+                        "SELECT a.title " +
                         "FROM articles AS a " +
                         "JOIN articles_categories AS aa ON a.id = aa.article_id " +
                         "JOIN categories AS c ON aa.category_id = c.id " +
@@ -80,7 +80,7 @@ public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo, IDAO
 
     public List<Article> topFiveMostViewedArticlesForToday() throws SQLException {
         String topFiveMostViewedArticleSQL =
-                "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id, u.user_name " +
+                        "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id, u.user_name " +
                         "FROM articles AS a " +
                         "LEFT JOIN users AS u ON a.author_id = u.id " +
                         "WHERE DATE(a.date_published) = CURRENT_DATE() " +
@@ -88,23 +88,7 @@ public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo, IDAO
         SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(topFiveMostViewedArticleSQL);
         List<Article> listWithArticles = new ArrayList<>();
         while (rowSet.next()) {
-            listWithArticles.add(this.rowSetCreateArticle(rowSet));
-        }
-        return listWithArticles;
-    }
-
-    public List<Article> allArticlesToASpecificCategory(String categoryName) throws SQLException {
-        String allArticles =
-                "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id, u.user_name " +
-                        "FROM articles AS a " +
-                        "LEFT JOIN users AS u ON a.author_id = u.id " +
-                        "JOIN articles_categories AS aa ON a.id = aa.article_id " +
-                        "JOIN categories AS c ON aa.category_id = c.id " +
-                        "WHERE c.category_name = ?;";
-        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(allArticles, categoryName);
-        List<Article> listWithArticles = new ArrayList<>();
-        while (rowSet.next()) {
-            listWithArticles.add(this.rowSetCreateArticle(rowSet));
+            listWithArticles.add(this.createArticleByRowSet(rowSet));
         }
         return listWithArticles;
     }
@@ -129,23 +113,11 @@ public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo, IDAO
         return rowAffected;
     }
 
-    public Article articleByID(long articleID) {
-        String searchSQL = "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id,  u.user_name " +
-                "FROM articles AS a " +
-                "LEFT JOIN users AS u ON a.author_id = u.id " +
-                "WHERE a.id = ?;";
-        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(searchSQL, articleID);
-        if (rowSet.next()) {
-            return this.rowSetCreateArticle(rowSet);
-        }
-        return null;
-    }
-
     @Override
     public Collection<String> all() throws SQLException {
         String findAllTitleOfArticleSQL = "SELECT title FROM articles;";
         SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(findAllTitleOfArticleSQL);
-        Collection<String> listWithTitle = new ArrayList();
+        Collection<String> listWithTitle = new ArrayList<>();
         while (rowSet.next()) {
             listWithTitle.add(rowSet.getString("title"));
         }
@@ -155,7 +127,7 @@ public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo, IDAO
     @Override
     public Collection<POJO> allByID(long id) throws SQLException {
         String allArticles =
-                "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id, u.user_name " +
+                        "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id, u.user_name " +
                         "FROM articles AS a " +
                         "LEFT JOIN users AS u ON a.author_id = u.id " +
                         "JOIN articles_categories AS aa ON a.id = aa.article_id " +
@@ -164,7 +136,7 @@ public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo, IDAO
         SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(allArticles, id);
         Collection<POJO> listWithArticles = new ArrayList<>();
         while (rowSet.next()) {
-            listWithArticles.add(this.rowSetCreateArticle(rowSet));
+            listWithArticles.add(this.createArticleByRowSet(rowSet));
         }
         return listWithArticles;
     }

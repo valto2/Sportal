@@ -26,7 +26,7 @@ public class CategoriesController {
     public String addCategory(@RequestBody Category category,
                               HttpServletResponse response, HttpSession session) throws SQLException, IOException {
         if (session.getAttribute("userID") == null) {
-            response.sendRedirect("LoginForm.html");
+            response.sendRedirect("/user/loginForm");
         }
         Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
         if (!isAdmin) {
@@ -37,7 +37,7 @@ public class CategoriesController {
             response.setStatus(400);
             return new Gson().toJson(WRONG_INFORMATION);
         }
-        this.categoriesDAO.addingCategory(category.getCategoryName());
+        this.categoriesDAO.addCategory(category);
         return new Gson().toJson("Successful added category");
     }
 
@@ -54,18 +54,19 @@ public class CategoriesController {
     @GetMapping(value = "/category_id/by_category_Name/{category_name}")
     public void setCategoryIDByTheName(@PathVariable(name = "category_name") String categoryName,
                                        HttpServletResponse response,
-                                       HttpSession session)throws SQLException, IOException {
-        if (categoryName.isEmpty()){
+                                       HttpSession session) throws SQLException, IOException {
+        if (categoryName.isEmpty()) {
             response.setStatus(400);
             response.getWriter().append(WRONG_REQUEST);
         }
         categoryName = categoryName.replace("_", " ");
         long categoryID = this.categoriesDAO.returnID(categoryName);
-        if (categoryID == 0){
+        if (categoryID == 0) {
             response.setStatus(404);
             response.getWriter().append(NOT_EXISTS_OBJECT);
         }
         session.setAttribute("categoryID", categoryID);
+        response.sendRedirect("/all_articles/by_categoryID");
     }
 
     @GetMapping(value = "/all_categories_name")

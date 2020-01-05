@@ -26,7 +26,7 @@ public class ArticlesController {
                                 HttpServletResponse response,
                                 HttpSession session) throws SQLException, IOException {
         if (session.getAttribute("userID") == null) {
-            response.sendRedirect("LoginForm.html");
+            response.sendRedirect("/user/loginForm");
         }
         long userID = (long) session.getAttribute("userID");
         Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");

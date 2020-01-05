@@ -37,7 +37,7 @@ public class PictureDAO extends DAO implements IDAODeleteByID, IDAOAllPOJOByID {
         return listWithPictures;
     }
 
-    private Picture createPictureByRowSet(SqlRowSet rowSet) {
+    private Picture createPictureByRowSet(SqlRowSet rowSet) throws SQLException {
         Picture picture = new Picture();
         picture.setId(rowSet.getLong("id"));
         picture.setUrlOFPicture(rowSet.getString("picture_url"));

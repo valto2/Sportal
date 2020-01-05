@@ -14,9 +14,13 @@ public class UsersLikeArticlesDAO extends DAO
         implements IDAOManyToMany, IDAODeleteFromThirdTable, IDAOAllNumberByID, IDAOExistsInThirdTable {
 
     @Override
-    public void addInThirdTable(long leftColumn, long rightColumn) throws SQLException {
+    public boolean addInThirdTable(long leftColumn, long rightColumn) throws SQLException {
         String insertSQL = "INSERT INTO users_like_articles (article_id, user_id) VALUE (?, ?);";
-        this.jdbcTemplate.update(insertSQL,leftColumn,rightColumn);
+        int rowAffected = this.jdbcTemplate.update(insertSQL,leftColumn,rightColumn);
+        if (rowAffected == 0){
+            return false;
+        }
+        return true;
     }
 
     @Override

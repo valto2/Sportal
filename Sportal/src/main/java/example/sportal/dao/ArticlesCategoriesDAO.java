@@ -1,6 +1,7 @@
 package example.sportal.dao;
 
 import example.sportal.dao.interfaceDAO.IDAODeleteFromThirdTable;
+import example.sportal.dao.interfaceDAO.IDAOExistsInThirdTable;
 import example.sportal.dao.interfaceDAO.IDAOManyToMany;
 import example.sportal.model.Article;
 import example.sportal.model.Category;
@@ -13,20 +14,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Component
-public class ArticlesCategoriesDAO extends DAO implements IDAOManyToMany, IDAODeleteFromThirdTable {
+public class ArticlesCategoriesDAO extends DAO
+        implements IDAOManyToMany, IDAODeleteFromThirdTable, IDAOExistsInThirdTable {
 
 
     @Override
-    public void addInThirdTable(long leftColumn, long rightColumn) throws SQLException {
+    public boolean addInThirdTable(long leftColumn, long rightColumn) throws SQLException {
         String insertCategoryToArticleSQL = "INSERT INTO articles_categories (article_id ,category_id) VALUES (?,?);";
-        this.jdbcTemplate.update(insertCategoryToArticleSQL, leftColumn, rightColumn);
+        int rowAffected = this.jdbcTemplate.update(insertCategoryToArticleSQL, leftColumn, rightColumn);
+        if (rowAffected == 0) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public void deleteFromThirdTable(long leftColumn, long rightColumn) throws SQLException {
-        String deleteDislikeSQL =
-                        "DELETE FROM articles_categories " +
-                        "WHERE article_id = ? AND category_id = ?;";
+        String deleteDislikeSQL = "DELETE FROM articles_categories WHERE article_id = ? AND category_id = ?;";
         this.jdbcTemplate.update(deleteDislikeSQL, leftColumn, rightColumn);
     }
 
@@ -46,7 +50,7 @@ public class ArticlesCategoriesDAO extends DAO implements IDAOManyToMany, IDAODe
         return listWithCategories;
     }
 
-    private Article createArticleByRowSet(SqlRowSet rowSet){
+    private Article createArticleByRowSet(SqlRowSet rowSet) {
         Article article = new Article();
         article.setId(rowSet.getInt("id"));
         article.setTitle(rowSet.getString("title"));
@@ -69,10 +73,20 @@ public class ArticlesCategoriesDAO extends DAO implements IDAOManyToMany, IDAODe
         return listWithCategories;
     }
 
-    private Category createCategoryByRowSet(SqlRowSet rowSet){
+    private Category createCategoryByRowSet(SqlRowSet rowSet) {
         Category category = new Category();
         category.setId(rowSet.getInt("id"));
         category.setCategoryName(rowSet.getString("category_name"));
         return category;
+    }
+
+    @Override
+    public boolean existsInThirdTable(long leftColumn, long rightColumn) throws SQLException {
+        String selectDislikesSQL =
+                "SELECT article_id, category_id " +
+                        "FROM articles_categories " +
+                        "WHERE article_id = ? AND category_id = ?;";
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(selectDislikesSQL, leftColumn, rightColumn);
+        return rowSet.next();
     }
 }

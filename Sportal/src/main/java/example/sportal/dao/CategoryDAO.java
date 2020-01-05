@@ -2,7 +2,7 @@ package example.sportal.dao;
 
 import example.sportal.dao.interfaceDAO.IDAOAllInfo;
 import example.sportal.dao.interfaceDAO.IDAODeleteByID;
-import example.sportal.dao.interfaceDAO.IDAOReturnPOJODIfExistsInTable;
+import example.sportal.dao.interfaceDAO.IDAOReturnPOJOIDIfExistsInTable;
 import example.sportal.model.Category;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -14,12 +14,12 @@ import java.util.List;
 
 @Component
 public class CategoryDAO extends DAO
-        implements IDAODeleteByID, IDAOAllInfo, IDAOReturnPOJODIfExistsInTable {
+        implements IDAODeleteByID, IDAOAllInfo, IDAOReturnPOJOIDIfExistsInTable {
 
 
-    public void addingCategory(String category) throws SQLException {
+    public void addCategory(Category category) throws SQLException {
         String insertCategorySQL = "INSERT INTO categories (category_name) VALUES (?);";
-        this.jdbcTemplate.update(insertCategorySQL, category);
+        this.jdbcTemplate.update(insertCategorySQL, category.getCategoryName());
     }
 
     @Override
