@@ -1,10 +1,10 @@
 package example.sportal.controllers;
 
 import com.google.gson.Gson;
-import example.sportal.dao.PictureDAO;
-import example.sportal.model.POJO;
-import example.sportal.model.PageOfArticle;
-import example.sportal.model.Picture;
+import example.sportal.model.dao.PictureDAO;
+import example.sportal.model.pojo.POJO;
+import example.sportal.model.pojo.PageOfArticle;
+import example.sportal.model.pojo.Picture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,40 +22,43 @@ public class PicturesController {
     @Autowired
     private PictureDAO picturesDAO;
 
-    @PostMapping(value = "/admin/add/picture_to_article")
-    public String createPicture(@RequestBody Picture picture,
-                                HttpServletResponse response,
-                                HttpSession session) throws SQLException, IOException {
-        if (session.getAttribute("userID") == null) {
-            response.sendRedirect("/user/loginForm");
+    @PostMapping(value = "/pictures")
+    public void add(@RequestBody Picture picture,
+                    HttpServletResponse response,
+                    HttpSession session) throws SQLException, IOException {
+        if (session.getAttribute("userId") == null) {
+            response.sendRedirect("/login");
         }
         Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
         if (!isAdmin || picture.getUrlOFPicture().isEmpty()) {
             response.setStatus(400);
-            return new Gson().toJson(WRONG_INFORMATION);
+            response.getWriter().append(WRONG_INFORMATION);
         }
-        if (session.getAttribute("articleID") == null){
+        if (session.getAttribute("articleId") == null) {
             response.sendRedirect("/all_categories_name");
         }
-        long articleID = (long) session.getAttribute("articleID");
+        long articleId = (long) session.getAttribute("articleId");
         boolean checkURLOfPictureExists = this.picturesDAO.existsURLOfPicture(picture.getUrlOFPicture());
         if (checkURLOfPictureExists) {
             response.setStatus(400);
-            return new Gson().toJson(EXISTS);
+            response.getWriter().append(EXISTS);
         }
-        picture.setArticleID(articleID);
+        // vasko : setFields from formPictureDTO to picture
+        picture.setArticleID(articleId);
         this.picturesDAO.addingOfPictureToTheArticle(picture);
-        return new Gson().toJson("Successful added picture to article!");
+        // vasko : return pictureDTO
     }
 
-    @GetMapping(value = "/all/pictures_of_article/{article_id}")
-    public void getAllPictureByArticleTitle(@PathVariable(name = "article_id") Long articleID,
-                                            HttpServletResponse response,
-                                            HttpSession session) throws SQLException, IOException {
-        Collection<POJO> listFromPictures = this.picturesDAO.allByID(articleID);
+    @GetMapping(value = "/pictures/{article_id}")
+    public void all(@PathVariable(name = "article_id") Long articleId,
+                    HttpServletResponse response,
+                    HttpSession session) throws SQLException, IOException {
+        Collection<POJO> listFromPictures = this.picturesDAO.allById(articleId);
         PageOfArticle pageOfArticle = (PageOfArticle) session.getAttribute("pageOfArticle");
         pageOfArticle.setPictures(listFromPictures);
         session.setAttribute("pageOfArticle", pageOfArticle);
-        response.sendRedirect("/all/comment_of_article/" + articleID);
+        response.sendRedirect("/comments/" + articleId);
     }
+
+    // vasko : delete
 }

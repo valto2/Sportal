@@ -1,9 +1,8 @@
 package example.sportal.controllers;
 
-import example.sportal.dao.UserDAO;
-import example.sportal.model.User;
-import example.sportal.validations.UserValidations;
-import org.springframework.stereotype.Controller;
+import example.sportal.model.dao.UserDAO;
+import example.sportal.model.pojo.User;
+import example.sportal.model.validations.UserValidations;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 

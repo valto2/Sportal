@@ -1,7 +1,6 @@
-package example.sportal.dao;
+package example.sportal.model.dao;
 
-import example.sportal.exceptions.UserException;
-import example.sportal.model.User;
+import example.sportal.model.pojo.User;
 import java.sql.SQLException;
 
 public interface IUserDAO {

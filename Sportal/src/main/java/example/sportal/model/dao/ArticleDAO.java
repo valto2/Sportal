@@ -1,8 +1,8 @@
-package example.sportal.dao;
+package example.sportal.model.dao;
 
-import example.sportal.dao.interfaceDAO.IDAOAllInfo;
-import example.sportal.dao.interfaceDAO.IDAODeleteByID;
-import example.sportal.model.Article;
+import example.sportal.model.dao.interfaceDAO.IDAOAllInfo;
+import example.sportal.model.dao.interfaceDAO.IDAODeleteById;
+import example.sportal.model.pojo.Article;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Component
-public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo {
+public class ArticleDAO extends DAO implements IDAODeleteById, IDAOAllInfo {
 
     public void addArticle(Article article) throws SQLException {
         String insertArticleSQL =
@@ -101,7 +101,7 @@ public class ArticleDAO extends DAO implements IDAODeleteByID, IDAOAllInfo {
     }
 
     @Override
-    public int deleteByID(long id) throws SQLException {
+    public int deleteById(long id) throws SQLException {
         this.setFKFalse();
         String deleteSQL = "DELETE FROM articles WHERE id = ?;";
         int rowAffected = this.jdbcTemplate.update(deleteSQL, id);

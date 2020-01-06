@@ -1,11 +1,11 @@
-package example.sportal.dao;
+package example.sportal.model.dao;
 
-import example.sportal.dao.interfaceDAO.IDAODeleteFromThirdTable;
-import example.sportal.dao.interfaceDAO.IDAOExistsInThirdTable;
-import example.sportal.dao.interfaceDAO.IDAOManyToMany;
-import example.sportal.model.Article;
-import example.sportal.model.Category;
-import example.sportal.model.POJO;
+import example.sportal.model.dao.interfaceDAO.IDAODeleteFromThirdTable;
+import example.sportal.model.dao.interfaceDAO.IDAOExistsInThirdTable;
+import example.sportal.model.dao.interfaceDAO.IDAOManyToMany;
+import example.sportal.model.pojo.Article;
+import example.sportal.model.pojo.Category;
+import example.sportal.model.pojo.POJO;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 

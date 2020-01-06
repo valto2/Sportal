@@ -1,4 +1,4 @@
-package example.sportal.validations;
+package example.sportal.model.validations;
 
 public class UserValidations {
 
