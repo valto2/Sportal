@@ -31,7 +31,7 @@ public class UserController {
     //login
     @PostMapping("/login")
     public String login(@RequestBody User user,
-                        Model model,
+                        Model model, //? model
                         HttpSession session) {
 
         if (!UserValidations.isEMailValid(user.getEmail())) {

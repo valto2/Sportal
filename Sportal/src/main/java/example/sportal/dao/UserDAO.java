@@ -24,7 +24,7 @@ public class UserDAO implements IUserDAO {
     // register
     public void registerUser(User user) throws SQLException {
         Connection connection = DBManager.getInstance().getConnection();
-        String sql = "INSERT INTO users (user_name, email, password)" +
+        String sql = "INSERT INTO users (user_name, user_email, user_password)" +
                 " VALUES (?, ?,md5(?));";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, user.getUsername());
@@ -33,15 +33,6 @@ public class UserDAO implements IUserDAO {
             statement.executeUpdate();
         }
     }
-    //        VALIDATIONS ===========================================================================
-//        try {
-//            if (isDuplicateName(user.getUsername())) {
-//                throw new UserException("The username is already taken. Please use a different one");
-//            }
-//            if (isDuplicateEmail(user.getEmail())) {
-//                throw new UserException("E-mail is already taken. Please use a different one.");
-//            }
-//        VALIDATIONS ===========================================================================
 
     @Override
     public User getUserByEmail(String email) throws SQLException {
@@ -80,7 +71,7 @@ public class UserDAO implements IUserDAO {
     @Override
     public boolean checkIfUserExists(String email) throws SQLException {
         Connection connection = DBManager.getInstance().getConnection();
-        String sql = "SELECT id FROM users WHERE email = ?;";
+        String sql = "SELECT id FROM users WHERE user_email = ?;";
         boolean exist = false;
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, email);
@@ -93,7 +84,7 @@ public class UserDAO implements IUserDAO {
     @Override
     public void updateUserInfo(User user) throws SQLException {
         Connection connection = DBManager.getInstance().getConnection();
-        String sql = "UPDATE users SET  = user_name = ? , emial = ?, password = ? WHERE id = ?;";
+        String sql = "UPDATE users SET  = user_name = ? , user_emial = ?, user_password = ? WHERE id = ?;";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getEmail());
