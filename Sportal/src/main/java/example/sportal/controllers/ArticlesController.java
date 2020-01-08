@@ -20,6 +20,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+<<<<<<< HEAD
+import static example.sportal.controllers.AbstractController.*;
+
+
+=======
+>>>>>>> d20b3cf0a57f896e373941ee381bcefc0e44d0c1
 @RestController
 public class ArticlesController extends AbstractController {
 

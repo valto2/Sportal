@@ -1,9 +1,12 @@
 package example.sportal.controllers;
 
+import example.sportal.exceptions.AuthorizationException;
 import example.sportal.model.dao.UserDAO;
+import example.sportal.model.dto.LoginUserDTO;
 import example.sportal.model.dto.RegisterUserDTO;
 import example.sportal.model.dto.UserWithoutPasswordDTO;
 import example.sportal.model.pojo.User;
+import example.sportal.model.validations.UserValidations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,13 +16,17 @@ import java.sql.SQLException;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
+<<<<<<< HEAD
+public class UserController extends AbstractController {
+=======
 public class UserController extends AbstractController{
 
+>>>>>>> d20b3cf0a57f896e373941ee381bcefc0e44d0c1
     @Autowired
     private UserDAO userDAO;
 
     @PostMapping("/users")
-    public UserWithoutPasswordDTO register(@RequestBody RegisterUserDTO userDto, HttpSession session) throws SQLException{
+    public UserWithoutPasswordDTO register(@RequestBody RegisterUserDTO userDto, HttpSession session) throws SQLException {
         //TODO validate data in userDto
         //create User object
         User user = new User(userDto);
@@ -30,6 +37,26 @@ public class UserController extends AbstractController{
         UserWithoutPasswordDTO responseDto = new UserWithoutPasswordDTO(user);
         return responseDto;
     }
+
+    @PostMapping("/users/login")
+    public UserWithoutPasswordDTO login(@RequestBody LoginUserDTO userDTO, HttpSession session) throws SQLException {
+        User user = userDAO.getByUsername(userDTO.getUsername());
+        if (user == null) {
+            throw new AuthorizationException("Invalid credentials");
+        } else if (UserValidations.isPasswordValid(userDTO.getPassword())) {
+            session.setAttribute(LOGGED_USER_KEY_IN_SESSION, user);
+            UserWithoutPasswordDTO responseDto = new UserWithoutPasswordDTO(user);
+            return responseDto;
+        } else {
+            throw new AuthorizationException("Invalid credentials");
+        }
+    }
+
+    @PostMapping("/users/logout")
+    public void login(HttpSession session) {
+        session.invalidate();
+    }
+
 }
 
 

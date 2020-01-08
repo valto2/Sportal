@@ -12,6 +12,13 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
 
+<<<<<<< HEAD
+import static example.sportal.controllers.AbstractController.EXISTS;
+import static example.sportal.controllers.AbstractController.WRONG_INFORMATION;
+
+
+=======
+>>>>>>> d20b3cf0a57f896e373941ee381bcefc0e44d0c1
 @RestController
 public class PicturesController extends AbstractController {
 

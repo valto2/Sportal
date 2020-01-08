@@ -8,73 +8,56 @@ import org.springframework.stereotype.Component;
 import java.sql.*;
 
 
-    @Component
-    public class UserDAO implements IUserDAO{
+@Component
+public class UserDAO implements IUserDAO {
 
-        private static final String REGISTER_USER_SQL = "INSERT INTO users (" +
-                "user_name, " +
-                "user_password, " +
-                "user_email, " +
-                "VALUES (?,?,?);";
-        private static final String SELECT_USER_BY_ID = "SELECT " +
-                "id, " +
-                "user_name, " +
-                "user_password, " +
-                "user_email, " +
-                "FROM users " +
-                "WHERE id = ?;";
+    private static final String REGISTER_USER_SQL = "INSERT INTO users (" +
+            "user_name, " +
+            "user_password, " +
+            "user_email, " +
+            "VALUES (?,?,?);";
+    private static final String SELECT_USER_BY_USERNAME = "SELECT " +
+            "id, " +
+            "user_name, " +
+            "user_email, " +
+            "user_password, " +
+            "FROM users " +
+            "WHERE user_name = ?;";
 
-        @Autowired
-        private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-//    private static UserDAO mInstance;
 
-//    private UserDAO() {
-//    }
-//
-//    public static UserDAO getInstance() {
-//        if (mInstance == null) {
-//            mInstance = new UserDAO();
-//        }
-//        return mInstance;
-//    }
-
-        @Override
-        public void registerUser(User user) throws SQLException {
-            Connection connection = jdbcTemplate.getDataSource().getConnection();
-            try(PreparedStatement ps = connection.prepareStatement(REGISTER_USER_SQL, Statement.RETURN_GENERATED_KEYS)) {
-                ps.setString(1, user.getUsername());
-                ps.setString(2, user.getPassword());
-                ps.setString(3, user.getEmail());
-                ps.executeUpdate();
-                ResultSet keys = ps.getGeneratedKeys();
-                keys.next();
-                user.setId(keys.getLong(1));
+    @Override
+    public void registerUser(User user) throws SQLException {
+        Connection connection = jdbcTemplate.getDataSource().getConnection();
+        try (PreparedStatement ps = connection.prepareStatement(REGISTER_USER_SQL, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, user.getUsername());
+            ps.setString(2, user.getPassword());
+            ps.setString(3, user.getEmail());
+            ps.executeUpdate();
+            ResultSet keys = ps.getGeneratedKeys();
+            keys.next();
+            user.setId(keys.getLong(1));
         }
     }
 
-//    @Override
-//    // register
-//    public void registerUser(User user) throws SQLException {
-//        Connection connection = DBManager.getInstance().getConnection();
-//        String sql = "INSERT INTO users (user_name, email, password)" +
-//                " VALUES (?, ?,md5(?));";
-//        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-//            statement.setString(1, user.getUsername());
-//            statement.setString(2, user.getEmail());
-//            statement.setString(3, user.getPassword());
-//            statement.executeUpdate();
-//        }
-//    }
-    //        VALIDATIONS ===========================================================================
-//        try {
-//            if (isDuplicateName(user.getUsername())) {
-//                throw new UserException("The username is already taken. Please use a different one");
-//            }
-//            if (isDuplicateEmail(user.getEmail())) {
-//                throw new UserException("E-mail is already taken. Please use a different one.");
-//            }
-//        VALIDATIONS ===========================================================================
+    public User getByUsername(String username) throws SQLException {
+        Connection connection = jdbcTemplate.getDataSource().getConnection();
+        try (PreparedStatement ps = connection.prepareStatement(SELECT_USER_BY_USERNAME, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, username);
+            ResultSet rows = ps.executeQuery();
+            if (rows.next()) {
+                return new User(rows.getLong("id"),
+                        rows.getString("user_name"),
+                        rows.getString("user_email"),
+                        rows.getString("user_password"),
+                        rows.getBoolean("is_admin"));
+            } else {
+                return null;
+            }
+        }
+    }
 
     @Override
     public User getUserByEmail(String email) throws SQLException {
@@ -136,7 +119,40 @@ import java.sql.*;
         }
     }
 }
+//    private static UserDAO mInstance;
 
+//    private UserDAO() {
+//    }
+//
+//    public static UserDAO getInstance() {
+//        if (mInstance == null) {
+//            mInstance = new UserDAO();
+//        }
+//        return mInstance;
+//    }
+
+//    @Override
+//    // register
+//    public void registerUser(User user) throws SQLException {
+//        Connection connection = DBManager.getInstance().getConnection();
+//        String sql = "INSERT INTO users (user_name, email, password)" +
+//                " VALUES (?, ?,md5(?));";
+//        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+//            statement.setString(1, user.getUsername());
+//            statement.setString(2, user.getEmail());
+//            statement.setString(3, user.getPassword());
+//            statement.executeUpdate();
+//        }
+//    }
+//        VALIDATIONS ===========================================================================
+//        try {
+//            if (isDuplicateName(user.getUsername())) {
+//                throw new UserException("The username is already taken. Please use a different one");
+//            }
+//            if (isDuplicateEmail(user.getEmail())) {
+//                throw new UserException("E-mail is already taken. Please use a different one.");
+//            }
+//        VALIDATIONS ===========================================================================
 
 //    //     check existing name
 //    private boolean isDuplicateName(String name) throws SQLException {
