@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.time.LocalDateTime;
 
 public abstract class AbstractController {
@@ -22,7 +21,6 @@ public abstract class AbstractController {
     static final String SOMETHING_WENT_WRONG = "Please try again!";
     static final String EXISTS = "That object exists!";
     static final String FAILED_CREDENTIALS = "Validate your data is failed!";
-    private static final String TRY_AGAIN = "Please try again later!";
     static final String WRONG_INFORMATION = "Wrong information about the user or empty fields!";
     static final String COPYRIGHT = "Sportal holds the copyright of this article.";
     static final String NOT_EXISTS_OBJECT = "Not found!";
@@ -113,32 +111,27 @@ public abstract class AbstractController {
         return exceptionObject;
     }
 
-
     @ExceptionHandler(IOException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public String handlerOfIOException(IOException e) {
-        System.out.println(e.getMessage());
-        return TRY_AGAIN;
-    }
-
-    @ExceptionHandler(ParseException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public String handlerOfParseException(ParseException e) {
-        System.out.println(e.getMessage());
-        return TRY_AGAIN;
+    public ExceptionObject handlerOfIOException(IOException e) {
+        ExceptionObject exceptionObject = new ExceptionObject(
+                e.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                LocalDateTime.now(),
+                e.getClass().getName()
+        );
+        return exceptionObject;
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.I_AM_A_TEAPOT)
-    public String handlerOfException(Exception e) {
-        System.out.println(e.getMessage());
-        return TRY_AGAIN;
-    }
-
-    @ExceptionHandler(IllegalStateException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handlerOfIllegalStateException(Exception e) {
-        System.out.println(e.getMessage());
-        return TRY_AGAIN;
+    public ExceptionObject handlerOfException(Exception e) {
+        ExceptionObject exceptionObject = new ExceptionObject(
+                e.getMessage(),
+                HttpStatus.NOT_FOUND.value(),
+                LocalDateTime.now(),
+                e.getClass().getName()
+        );
+        return exceptionObject;
     }
 }
