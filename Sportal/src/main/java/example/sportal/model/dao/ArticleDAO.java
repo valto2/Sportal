@@ -21,7 +21,7 @@ public class ArticleDAO extends DAO implements IDAODeleteById, IDAOAllInfo {
         Timestamp createDateAndTime = Timestamp.valueOf(LocalDateTime.now());
         this.jdbcTemplate.update(
                 insertArticleSQL,
-                article.getTitle(), article.getFullText(), createDateAndTime, 0, article.getAuthorID());
+                article.getTitle(), article.getFullText(), createDateAndTime, 0, article.getAuthorId());
     }
 
     public void addViewOfSpecificArticleID(long articleID) throws SQLException {
@@ -31,9 +31,8 @@ public class ArticleDAO extends DAO implements IDAODeleteById, IDAOAllInfo {
 
     public Article articleByTitle(String title) throws SQLException {
         String searchSQL =
-                "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id, u.user_name " +
+                "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id " +
                         "FROM articles AS a " +
-                        "LEFT JOIN users AS u ON a.author_id = u.id " +
                         "WHERE a.title = ?;";
         SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(searchSQL, title);
         if (rowSet.next()) {
@@ -49,10 +48,7 @@ public class ArticleDAO extends DAO implements IDAODeleteById, IDAOAllInfo {
         article.setFullText(rowSet.getString("full_text"));
         article.setCreateDateAndTime(rowSet.getTimestamp("date_published"));
         article.setViews(rowSet.getInt("views") + 1);
-        article.setAuthorID(rowSet.getLong("author_id"));
-        if (rowSet.getString("user_name") != null) {
-            article.setAuthorName(rowSet.getString("user_name"));
-        }
+        article.setAuthorId(rowSet.getLong("author_id"));
         return article;
     }
 

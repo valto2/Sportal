@@ -7,7 +7,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Picture implements POJO {
+public class Picture {
 
     private long id;
     private String urlOFPicture;
