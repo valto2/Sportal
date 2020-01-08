@@ -21,7 +21,7 @@ public class CommentDAO {
         try {
             Connection connection = DBManager.INSTANCE.getConnection();
             String sql = "insert into comments " +
-                    "(full_comment_text, date_published, user_id, article_id) values" +
+                    "(text, time_posted, owner_id, article_id) values" +
                     "(?,?,?,?);";
             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, comment.getFullCommentText());
@@ -43,7 +43,7 @@ public class CommentDAO {
         try {
             Connection connection = DBManager.INSTANCE.getConnection();
             String sql = "insert into comments " +
-                    "(full_comment_text, date_published, article_id, user_id, reply_id) values" +
+                    "(text, time_posted, article_id, user_id, replied_to_id) values" +
                     "(?,?,?,?,?);";
             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, comment.getFullCommentText());
@@ -81,7 +81,7 @@ public class CommentDAO {
         try{
             Connection connection = DBManager.INSTANCE.getConnection();
             String deleteFromComments = "delete from comments where id = ? or reply_id = ?;";
-            String deleteFromLikes = "delete from users_like_comments where comment_id = ?";
+            String deleteFromLikes = "delete from users_liked_comments where comment_id = ?";
             String deleteFromDislikes = "delete from users_disliked_comments where comment_id = ?";
 
             try (PreparedStatement deleteFromCommentsStatement = connection.prepareStatement(deleteFromComments);
@@ -123,7 +123,7 @@ public class CommentDAO {
             Connection connection = DBManager.INSTANCE.getConnection();
             if(commentIsLiked(user, comment)){
                 setForeignKeysToZero(connection);
-                String unlike = "delete from users_like_comments where user_id = ? and comment_id = ?";
+                String unlike = "delete from users_liked_comments where user_id = ? and comment_id = ?";
                 PreparedStatement preparedStatement = connection.prepareStatement(unlike);
                 preparedStatement.setLong(1, user.getId());
                 preparedStatement.setLong(2, comment.getId());
@@ -140,7 +140,7 @@ public class CommentDAO {
                     preparedStatement.executeUpdate();
                     setForeignKeysToOne(connection);
                 }
-                String like = "insert into users_like_comments values (? , ?);";
+                String like = "insert into users_liked_comments values (? , ?);";
                 PreparedStatement preparedStatement = connection.prepareStatement(like);
                 preparedStatement.setInt(1, user.getId());
                 preparedStatement.setLong(2, comment.getId());
@@ -167,7 +167,7 @@ public class CommentDAO {
             else {
                 if(commentIsLiked(user, comment)){
                     setForeignKeysToZero(connection);
-                    String unlike = "delete from users_like_comments where user_id = ? and comment_id = ?";
+                    String unlike = "delete from users_liked_comments where user_id = ? and comment_id = ?";
                     PreparedStatement preparedStatement = connection.prepareStatement(unlike);
                     preparedStatement.setInt(1, user.getId());
                     preparedStatement.setLong(2, comment.getId());
@@ -202,7 +202,7 @@ public class CommentDAO {
     //finds if the current comment is already liked
     private boolean commentIsLiked(User user, Comment comment) throws SQLException {
         Connection connection = DBManager.INSTANCE.getConnection();
-        String sql = "select * from users_like_comments where user_id = ? and comment_id = ?;";
+        String sql = "select * from users_liked_comments where user_id = ? and comment_id = ?;";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setInt(1, user.getId());
             preparedStatement.setLong(2, comment.getId());
