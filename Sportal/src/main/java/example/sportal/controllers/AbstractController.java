@@ -25,8 +25,6 @@ public abstract class AbstractController {
     static final String FAILED_CREDENTIALS = "Validating your data is failed!";
     private static final String TRY_AGAIN = "Please try again later!";
 
-    static final String EXISTS = "That object exists!";
-    static final String FAILED_CREDENTIALS = "Validate your data is failed!";
     static final String WRONG_INFORMATION = "Wrong information about the user or empty fields!";
     static final String COPYRIGHT = "Sportal holds the copyright of this article.";
     static final String NOT_EXISTS_OBJECT = "Not found!";
