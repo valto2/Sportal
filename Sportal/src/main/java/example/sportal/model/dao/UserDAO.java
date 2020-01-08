@@ -1,38 +1,71 @@
 package example.sportal.model.dao;
 
 import example.sportal.model.pojo.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
 import java.sql.*;
 
-public class UserDAO implements IUserDAO {
 
+    @Component
+    public class UserDAO implements IUserDAO{
 
-    private static UserDAO mInstance;
+        private static final String REGISTER_USER_SQL = "INSERT INTO users (" +
+                "user_name, " +
+                "user_password, " +
+                "user_email, " +
+                "VALUES (?,?,?);";
+        private static final String SELECT_USER_BY_ID = "SELECT " +
+                "id, " +
+                "user_name, " +
+                "user_password, " +
+                "user_email, " +
+                "FROM users " +
+                "WHERE id = ?;";
 
-    private UserDAO() {
-    }
+        @Autowired
+        private JdbcTemplate jdbcTemplate;
 
-    public static UserDAO getInstance() {
-        if (mInstance == null) {
-            mInstance = new UserDAO();
+//    private static UserDAO mInstance;
+
+//    private UserDAO() {
+//    }
+//
+//    public static UserDAO getInstance() {
+//        if (mInstance == null) {
+//            mInstance = new UserDAO();
+//        }
+//        return mInstance;
+//    }
+
+        @Override
+        public void registerUser(User user) throws SQLException {
+            Connection connection = jdbcTemplate.getDataSource().getConnection();
+            try(PreparedStatement ps = connection.prepareStatement(REGISTER_USER_SQL, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setString(1, user.getUsername());
+                ps.setString(2, user.getPassword());
+                ps.setString(3, user.getEmail());
+                ps.executeUpdate();
+                ResultSet keys = ps.getGeneratedKeys();
+                keys.next();
+                user.setId(keys.getLong(1));
         }
-        return mInstance;
     }
 
-
-    @Override
-    // register
-    public void registerUser(User user) throws SQLException {
-        Connection connection = DBManager.getInstance().getConnection();
-        String sql = "INSERT INTO users (user_name, email, password)" +
-                " VALUES (?, ?,md5(?));";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getPassword());
-            statement.executeUpdate();
-        }
-    }
+//    @Override
+//    // register
+//    public void registerUser(User user) throws SQLException {
+//        Connection connection = DBManager.getInstance().getConnection();
+//        String sql = "INSERT INTO users (user_name, email, password)" +
+//                " VALUES (?, ?,md5(?));";
+//        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+//            statement.setString(1, user.getUsername());
+//            statement.setString(2, user.getEmail());
+//            statement.setString(3, user.getPassword());
+//            statement.executeUpdate();
+//        }
+//    }
     //        VALIDATIONS ===========================================================================
 //        try {
 //            if (isDuplicateName(user.getUsername())) {
@@ -98,11 +131,12 @@ public class UserDAO implements IUserDAO {
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getEmail());
             statement.setString(3, user.getPassword());
-            statement.setInt(4, user.getId());
+            statement.setLong(4, user.getId());
             statement.executeUpdate();
         }
     }
 }
+
 
 //    //     check existing name
 //    private boolean isDuplicateName(String name) throws SQLException {
