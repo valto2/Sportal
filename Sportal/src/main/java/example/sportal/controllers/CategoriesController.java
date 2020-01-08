@@ -11,14 +11,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-<<<<<<< HEAD
-import static example.sportal.controllers.AbstractController.NOT_EXISTS_OBJECT;
-import static example.sportal.controllers.AbstractController.WRONG_INFORMATION;
-
-
-
-=======
->>>>>>> d20b3cf0a57f896e373941ee381bcefc0e44d0c1
 @RestController
 public class CategoriesController extends AbstractController {
 
