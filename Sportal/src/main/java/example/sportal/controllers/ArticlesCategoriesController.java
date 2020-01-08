@@ -1,9 +1,11 @@
 package example.sportal.controllers;
 
+import example.sportal.exceptions.AuthorizationException;
 import example.sportal.model.dao.ArticlesCategoriesDAO;
+import example.sportal.model.dto.article.ReturnFullDataArticleDTO;
 import example.sportal.model.pojo.Article;
 import example.sportal.model.pojo.Category;
-import example.sportal.model.pojo.PageOfArticle;
+import example.sportal.model.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,11 +15,14 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
 
+<<<<<<< HEAD
 import static example.sportal.controllers.AbstractController.*;
 
 
+=======
+>>>>>>> d20b3cf0a57f896e373941ee381bcefc0e44d0c1
 @RestController
-public class ArticlesCategoriesController {
+public class ArticlesCategoriesController extends AbstractController {
 
     @Autowired
     private ArticlesCategoriesDAO articlesCategoriesDAO;
@@ -26,11 +31,11 @@ public class ArticlesCategoriesController {
     public void addCategoryToArticle(@RequestBody Category category,
                                      HttpServletResponse response,
                                      HttpSession session) throws IOException, SQLException {
-        if (session.getAttribute("userId") == null) {
-            response.sendRedirect("/login");
+        User user = (User) session.getAttribute(LOGGED_USER_KEY_IN_SESSION);
+        if (user == null) {
+            throw new AuthorizationException(LOGIN_MESSAGES);
         }
-        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-        if (!isAdmin) {
+        if (!user.getIsAdmin()) {
             response.setStatus(400);
             response.getWriter().append(WRONG_INFORMATION);
         }
@@ -51,9 +56,9 @@ public class ArticlesCategoriesController {
     // vasko : delete category by article id
     // vasko : delete article by category id
 
-    @GetMapping(value = "/articles/{category_id}")
+    @GetMapping(value = "/articles/category/{category_id}")
     public Collection<Article> articleByCategoryId(@PathVariable(name = "category_id") Long categoryId,
-                                                HttpServletResponse response) throws SQLException, IOException {
+                                                   HttpServletResponse response) throws SQLException, IOException {
         Collection<Article> ListFromTitleOfArticles = this.articlesCategoriesDAO.allArticlesByCategoryID(categoryId);
         if (ListFromTitleOfArticles.isEmpty()) {
             response.setStatus(404);
@@ -68,9 +73,10 @@ public class ArticlesCategoriesController {
                                                HttpServletResponse response,
                                                HttpSession session) throws SQLException, IOException {
         Collection<Category> listFromCategories = this.articlesCategoriesDAO.allCategoriesByArticlesID(articleId);
-        PageOfArticle pageOfArticle = (PageOfArticle) session.getAttribute("pageOfArticle");
-        pageOfArticle.setCategories(listFromCategories);
-        session.setAttribute("pageOfArticle", pageOfArticle);
+        ReturnFullDataArticleDTO returnFullDataArticleDTO =
+                (ReturnFullDataArticleDTO) session.getAttribute(RETURN_ARTICLE);
+        returnFullDataArticleDTO.setCategories(listFromCategories);
+        session.setAttribute(RETURN_ARTICLE, returnFullDataArticleDTO);
         response.sendRedirect("/pictures/" + articleId);
     }
 }

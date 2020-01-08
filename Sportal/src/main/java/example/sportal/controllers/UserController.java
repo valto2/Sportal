@@ -16,7 +16,12 @@ import java.sql.SQLException;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
+<<<<<<< HEAD
 public class UserController extends AbstractController {
+=======
+public class UserController extends AbstractController{
+
+>>>>>>> d20b3cf0a57f896e373941ee381bcefc0e44d0c1
     @Autowired
     private UserDAO userDAO;
 

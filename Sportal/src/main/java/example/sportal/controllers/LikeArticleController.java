@@ -1,7 +1,7 @@
 package example.sportal.controllers;
 
 import example.sportal.model.dao.UsersLikeArticlesDAO;
-import example.sportal.model.pojo.PageOfArticle;
+import example.sportal.model.dto.article.ReturnFullDataArticleDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 @RestController
-public class LikeArticleController {
+public class LikeArticleController extends AbstractController {
 
     @Autowired
     private UsersLikeArticlesDAO likeArticlesDAO;
@@ -41,10 +41,10 @@ public class LikeArticleController {
     public void all(@PathVariable("article_id") Long articleID,
                     HttpServletResponse response,
                     HttpSession session) throws SQLException, IOException {
-        PageOfArticle pageOfArticle = (PageOfArticle) session.getAttribute("pageOfArticle");
-        pageOfArticle.setNumberOfLikes(this.likeArticlesDAO.allById(articleID));
-        session.setAttribute("pageOfArticle", pageOfArticle);
-        response.sendRedirect("/all_data_of_articles");
+        ReturnFullDataArticleDTO returnFullDataArticleDTO = (ReturnFullDataArticleDTO) session.getAttribute(RETURN_ARTICLE);
+        returnFullDataArticleDTO.setNumberOfLikes(this.likeArticlesDAO.allById(articleID));
+        session.setAttribute(RETURN_ARTICLE, returnFullDataArticleDTO);
+        response.sendRedirect("/users/" + returnFullDataArticleDTO.getArticle().getAuthorId());
     }
 
     // vasko : delete
