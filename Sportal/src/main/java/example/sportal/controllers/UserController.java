@@ -22,6 +22,10 @@ import java.sql.SQLException;
 
 
 @RestController
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07cbd42ef9d542453aaddda3ac5a53e49a5d314c
 public class UserController extends AbstractController {
 
     @Autowired

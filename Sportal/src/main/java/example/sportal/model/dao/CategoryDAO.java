@@ -1,68 +1,70 @@
 package example.sportal.model.dao;
 
-import example.sportal.model.dao.interfaceDAO.IDAOAllInfo;
 import example.sportal.model.dao.interfaceDAO.IDAODeleteById;
-import example.sportal.model.dao.interfaceDAO.IDAOReturnPOJOIDIfExistsInTable;
 import example.sportal.model.pojo.Category;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Component
-public class CategoryDAO extends DAO
-        implements IDAODeleteById, IDAOAllInfo, IDAOReturnPOJOIDIfExistsInTable {
+public class CategoryDAO extends DAO implements IDAODeleteById {
 
 
-    public void addCategory(Category category) throws SQLException {
-        String insertCategorySQL = "INSERT INTO categories (category_name) VALUES (?);";
-        this.jdbcTemplate.update(insertCategorySQL, category.getCategoryName());
+    private static final String INSERT_CATEGORY_SQL = "INSERT INTO categories (category_name) VALUES (?);";
+    private static final String DELETE_CATEGORY_SQL = "DELETE FROM categories WHERE id = ?;";
+    private static final String UPDATE_CATEGORY_NAME = "UPDATE categories SET category_name = ? WHERE id = ?;";
+    private static final String FIND_BY_ID = "SELECT category_name FROM categories WHERE id = ?;";
+    private static final String ALL_CATEGORIES_SQL = "SELECT id, category_name FROM categories;";
+
+    public int addCategory(Category category) throws SQLException {
+        try (
+                Connection connection = this.jdbcTemplate.getDataSource().getConnection();
+                PreparedStatement ps = connection.prepareStatement(INSERT_CATEGORY_SQL, Statement.RETURN_GENERATED_KEYS)
+        ) {
+            ps.setString(1, category.getCategoryName());
+            int rowAffected = ps.executeUpdate();
+            ResultSet resultSet = ps.getGeneratedKeys();
+            resultSet.next();
+            category.setId(resultSet.getLong(1));
+            return rowAffected;
+        }
     }
 
     @Override
     public int deleteById(long id) throws SQLException {
-        String deleteCategorySQL= "DELETE FROM categories WHERE id = ?;";
-        return this.jdbcTemplate.update(deleteCategorySQL,id);
+        return this.jdbcTemplate.update(DELETE_CATEGORY_SQL, id);
     }
 
-    @Override
-    public Collection<String> all() throws SQLException {
-        String allCategoryNamesSQL = "SELECT category_name FROM categories;";
-        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(allCategoryNamesSQL);
-        Collection<String> listWithCategories = new ArrayList<>();
-        while (rowSet.next()) {
-            listWithCategories.add(rowSet.getString("category_name"));
-        }
-        return listWithCategories;
-    }
-
-    @Override
-    public long returnID(String name) throws SQLException {
-        String returnCategoryIDSQL = "SELECT id FROM categories WHERE category_name = ?;";
-        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(returnCategoryIDSQL, name);
-        if (rowSet.next()){
-            return rowSet.getLong("id");
-        }
-        return 0;
-    }
-
-    public List<Category> allCategories() {
-        String allCategoriesSQL = "SELECT id, category_name FROM categories;";
-        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(allCategoriesSQL);
+    public List<Category> allCategories() throws SQLException {
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(ALL_CATEGORIES_SQL);
         List<Category> listFromCategories = new ArrayList<>();
-        while (rowSet.next()){
+        while (rowSet.next()) {
             listFromCategories.add(this.createCategoryByRowSet(rowSet));
         }
         return listFromCategories;
     }
 
-    private Category createCategoryByRowSet(SqlRowSet rowSet){
+    private Category createCategoryByRowSet(SqlRowSet rowSet) throws SQLException {
         Category category = new Category();
-        category.setId(rowSet.getInt("id"));
+        category.setId(rowSet.getLong("id"));
         category.setCategoryName(rowSet.getString("category_name"));
         return category;
+    }
+
+    public int editById(Category category) throws SQLException {
+        return this.jdbcTemplate.update(UPDATE_CATEGORY_NAME, category.getCategoryName(), category.getId());
+    }
+
+    public Category findById(long id) throws SQLException {
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(FIND_BY_ID, id);
+        if (rowSet.next()) {
+            Category category = new Category();
+            category.setId(id);
+            category.setCategoryName(rowSet.getString("category_name"));
+        }
+        return null;
     }
 }

@@ -13,10 +13,18 @@ import java.sql.SQLException;
 public class UsersLikeArticlesDAO extends DAO
         implements IDAOManyToMany, IDAODeleteFromThirdTable, IDAOAllNumberById, IDAOExistsInThirdTable {
 
+    private static final String CHECK_EXISTS_LIKE =
+            "SELECT article_id, user_id " +
+            "FROM users_like_articles " +
+            "WHERE article_id = ? AND user_id = ?;";
+    private static final String COUNT_LIKES =
+            "SELECT COUNT(user_id) AS number_likes FROM users_like_articles WHERE article_id = ?;";
+    private static final String DELETE_LIKE = "DELETE FROM users_like_articles WHERE article_id = ? AND user_id = ?;";
+    private static final String INSERT_LIKE = "INSERT INTO users_like_articles (article_id, user_id) VALUE (?, ?);";
+
     @Override
     public boolean addInThirdTable(long leftColumn, long rightColumn) throws SQLException {
-        String insertSQL = "INSERT INTO users_like_articles (article_id, user_id) VALUE (?, ?);";
-        int rowAffected = this.jdbcTemplate.update(insertSQL,leftColumn,rightColumn);
+        int rowAffected = this.jdbcTemplate.update(INSERT_LIKE,leftColumn,rightColumn);
         if (rowAffected == 0){
             return false;
         }
@@ -25,14 +33,12 @@ public class UsersLikeArticlesDAO extends DAO
 
     @Override
     public void deleteFromThirdTable(long leftColumn, long rightColumn) throws SQLException {
-        String deleteSQL = "DELETE FROM users_like_articles WHERE article_id = ? AND user_id = ?;";
-        this.jdbcTemplate.update(deleteSQL,leftColumn,rightColumn);
+        this.jdbcTemplate.update(DELETE_LIKE,leftColumn,rightColumn);
     }
 
     @Override
     public int allById(long id) throws SQLException {
-        String countLikesSQL = "SELECT COUNT(user_id) AS number_likes FROM users_like_articles WHERE article_id = ?;";
-        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(countLikesSQL, id);
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(COUNT_LIKES, id);
         if (rowSet.next()) {
             return rowSet.getInt("number_likes");
         }
@@ -41,11 +47,7 @@ public class UsersLikeArticlesDAO extends DAO
 
     @Override
     public boolean existsInThirdTable(long leftColumn, long rightColumn) throws SQLException {
-        String selectLikesSQL =
-                "SELECT article_id, user_id " +
-                        "FROM users_like_articles " +
-                        "WHERE article_id = ? AND user_id = ?;";
-        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(selectLikesSQL, leftColumn, rightColumn);
+        SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(CHECK_EXISTS_LIKE, leftColumn, rightColumn);
         return rowSet.next();
     }
 }
