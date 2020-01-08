@@ -77,6 +77,18 @@ public abstract class AbstractController {
         return exceptionObject;
     }
 
+    @ExceptionHandler(NotExistsObjectExceptions.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionObject handlerOfNotExistsObjectException(Exception e) {
+        ExceptionObject exceptionObject = new ExceptionObject(
+                e.getMessage(),
+                HttpStatus.NOT_FOUND.value(),
+                LocalDateTime.now(),
+                e.getClass().getName()
+        );
+        return exceptionObject;
+    }
+
     @ExceptionHandler(AuthorizationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ExceptionObject handlerOfAuthorizationException(Exception e) {

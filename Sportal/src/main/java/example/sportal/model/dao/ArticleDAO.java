@@ -15,13 +15,25 @@ import java.util.List;
 @Component
 public class ArticleDAO extends DAO implements IDAODeleteById, IDAOAllInfo {
 
-    public void addArticle(Article article) throws SQLException {
-        String insertArticleSQL =
-                "INSERT INTO articles (title ,full_text, date_published, views, author_id) VALUES (?, ?, ?, ?, ?);";
-        Timestamp createDateAndTime = Timestamp.valueOf(LocalDateTime.now());
-        this.jdbcTemplate.update(
-                insertArticleSQL,
-                article.getTitle(), article.getFullText(), createDateAndTime, 0, article.getAuthorId());
+    private static final String INSERT_ARTICLE =
+            "INSERT INTO articles (title ,full_text, date_published, views, author_id) VALUES (?, ?, ?, ?, ?);";
+
+    public int addArticle(Article article) throws SQLException {
+        Connection connection = this.jdbcTemplate.getDataSource().getConnection();
+        try (PreparedStatement ps = connection.prepareStatement(INSERT_ARTICLE, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, article.getTitle());
+            ps.setString(2, article.getFullText());
+            Timestamp createDateAndTime = Timestamp.valueOf(LocalDateTime.now());
+            ps.setTimestamp(3, createDateAndTime);
+            article.setCreateDateAndTime(createDateAndTime);
+            ps.setInt(4, 0);
+            ps.setLong(5, article.getAuthorId());
+            int rowAffected = ps.executeUpdate();
+            ResultSet resultSet = ps.getGeneratedKeys();
+            resultSet.next();
+            article.setId(resultSet.getLong(1));
+            return rowAffected;
+        }
     }
 
     public void addViewOfSpecificArticleID(long articleID) throws SQLException {
@@ -31,9 +43,9 @@ public class ArticleDAO extends DAO implements IDAODeleteById, IDAOAllInfo {
 
     public Article articleByTitle(String title) throws SQLException {
         String searchSQL =
-                "SELECT a.id, a.title, a.full_text, a.date_published, a.views, a.author_id " +
-                        "FROM articles AS a " +
-                        "WHERE a.title = ?;";
+                "SELECT id, title, full_text, date_published, views, author_id " +
+                        "FROM articles " +
+                        "WHERE title = ?;";
         SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(searchSQL, title);
         if (rowSet.next()) {
             return this.createArticleByRowSet(rowSet);
@@ -52,9 +64,9 @@ public class ArticleDAO extends DAO implements IDAODeleteById, IDAOAllInfo {
         return article;
     }
 
-    public List<String> allArticleByTitleOrCategory(String titleOrCategory) throws SQLException {
+    public List<Article> allArticleByTitleOrCategory(String titleOrCategory) throws SQLException {
         String findAllTitleOfArticleSQL =
-                "SELECT a.id, a.title " +
+                "SELECT a.id, a.title, a.date_published " +
                         "FROM articles AS a " +
                         "JOIN articles_categories AS aa ON a.id = aa.article_id " +
                         "JOIN categories AS c ON aa.category_id = c.id " +
@@ -65,11 +77,15 @@ public class ArticleDAO extends DAO implements IDAODeleteById, IDAOAllInfo {
                         "WHERE a.title LIKE ?;";
         SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(findAllTitleOfArticleSQL,
                 titleOrCategory + "%", titleOrCategory + "%");
-        List<String> listWithTitleOfArticles = new ArrayList<>();
+        List<Article> listFromArticles = new ArrayList<>();
         while (rowSet.next()) {
-            listWithTitleOfArticles.add(rowSet.getString("title"));
+            Article article = new Article();
+            article.setId(rowSet.getLong("id"));
+            article.setTitle(rowSet.getString("title"));
+            article.setCreateDateAndTime(rowSet.getTimestamp("date_published"));
+            listFromArticles.add(article);
         }
-        return listWithTitleOfArticles;
+        return listFromArticles;
     }
 
     public List<String> topFiveMostViewedArticlesForToday() throws SQLException {
@@ -96,6 +112,7 @@ public class ArticleDAO extends DAO implements IDAODeleteById, IDAOAllInfo {
         this.jdbcTemplate.update(updateArticleTextSQL, newText, articleID);
     }
 
+    // todo delete article, delete and picture and categories to article
     @Override
     public int deleteById(long id) throws SQLException {
         this.setFKFalse();

@@ -11,11 +11,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-import static example.sportal.controllers.ResponseConstants.*;
-
-
 @RestController
-public class CategoriesController {
+public class CategoriesController extends AbstractController {
 
     @Autowired
     private CategoryDAO categoriesDAO;
@@ -53,7 +50,7 @@ public class CategoriesController {
         return listWhitCategories;
     }
 
-    @GetMapping(value = "/categories/{name}")
+    @GetMapping(value = "/categories/category_name/{name}")
     public void setCategoryIdByTheName(@PathVariable(name = "name") String categoryName,
                                        HttpServletResponse response) throws SQLException, IOException {
         long categoryId = this.categoriesDAO.returnID(categoryName);
@@ -61,6 +58,5 @@ public class CategoriesController {
             response.setStatus(404);
             response.getWriter().append(NOT_EXISTS_OBJECT);
         }
-        response.sendRedirect("/articles/" + categoryId);
     }
 }

@@ -135,14 +135,14 @@ public class CommentDAO {
                     setForeignKeysToZero(connection);
                     String sql = "delete from users_disliked_comments where user_id = ? and comment_id = ?";
                     PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                    preparedStatement.setInt(1, user.getId());
+                    preparedStatement.setLong(1, user.getId());
                     preparedStatement.setLong(2, comment.getId());
                     preparedStatement.executeUpdate();
                     setForeignKeysToOne(connection);
                 }
                 String like = "insert into users_liked_comments values (? , ?);";
                 PreparedStatement preparedStatement = connection.prepareStatement(like);
-                preparedStatement.setInt(1, user.getId());
+                preparedStatement.setLong(1, user.getId());
                 preparedStatement.setLong(2, comment.getId());
                 preparedStatement.executeUpdate();
             }
@@ -159,7 +159,7 @@ public class CommentDAO {
                 setForeignKeysToZero(connection);
                 String sql = "delete from users_disliked_comments where user_id = ? and comment_id = ?";
                 PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                preparedStatement.setInt(1, user.getId());
+                preparedStatement.setLong(1, user.getId());
                 preparedStatement.setLong(2, comment.getId());
                 preparedStatement.executeUpdate();
                 setForeignKeysToOne(connection);
@@ -169,14 +169,14 @@ public class CommentDAO {
                     setForeignKeysToZero(connection);
                     String unlike = "delete from users_liked_comments where user_id = ? and comment_id = ?";
                     PreparedStatement preparedStatement = connection.prepareStatement(unlike);
-                    preparedStatement.setInt(1, user.getId());
+                    preparedStatement.setLong(1, user.getId());
                     preparedStatement.setLong(2, comment.getId());
                     preparedStatement.executeUpdate();
                     setForeignKeysToOne(connection);
                 }
                 String dislike = "insert into users_disliked_comments values (? , ?);";
                 PreparedStatement preparedStatement = connection.prepareStatement(dislike);
-                preparedStatement.setInt(1, user.getId());
+                preparedStatement.setLong(1, user.getId());
                 preparedStatement.setLong(2, comment.getId());
                 preparedStatement.executeUpdate();
             }
@@ -204,7 +204,7 @@ public class CommentDAO {
         Connection connection = DBManager.INSTANCE.getConnection();
         String sql = "select * from users_liked_comments where user_id = ? and comment_id = ?;";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
-            preparedStatement.setInt(1, user.getId());
+            preparedStatement.setLong(1, user.getId());
             preparedStatement.setLong(2, comment.getId());
             ResultSet resultSet = preparedStatement.executeQuery();
             return resultSet.next();
@@ -216,7 +216,7 @@ public class CommentDAO {
         Connection connection = DBManager.INSTANCE.getConnection();
         String sql = "select * from users_disliked_comments where user_id = ? and comment_id = ?;";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
-            preparedStatement.setInt(1, user.getId());
+            preparedStatement.setLong(1, user.getId());
             preparedStatement.setLong(2, comment.getId());
             ResultSet resultSet = preparedStatement.executeQuery();
             return resultSet.next();

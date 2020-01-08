@@ -1,7 +1,7 @@
 package example.sportal.controllers;
 
 import example.sportal.model.dao.PictureDAO;
-import example.sportal.model.pojo.PageOfArticle;
+import example.sportal.model.dto.article.ReturnFullDataArticleDTO;
 import example.sportal.model.pojo.Picture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +12,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import static example.sportal.controllers.ResponseConstants.*;
-
 @RestController
-public class PicturesController {
+public class PicturesController extends AbstractController {
 
     @Autowired
     private PictureDAO picturesDAO;
@@ -52,9 +50,10 @@ public class PicturesController {
                     HttpServletResponse response,
                     HttpSession session) throws SQLException, IOException {
         Collection<Picture> listFromPictures = this.picturesDAO.allById(articleId);
-        PageOfArticle pageOfArticle = (PageOfArticle) session.getAttribute("pageOfArticle");
-        pageOfArticle.setPictures(listFromPictures);
-        session.setAttribute("pageOfArticle", pageOfArticle);
+        ReturnFullDataArticleDTO returnFullDataArticleDTO =
+                (ReturnFullDataArticleDTO) session.getAttribute(RETURN_ARTICLE);
+        returnFullDataArticleDTO.setPictures(listFromPictures);
+        session.setAttribute(RETURN_ARTICLE, returnFullDataArticleDTO);
         response.sendRedirect("/comments/" + articleId);
     }
 

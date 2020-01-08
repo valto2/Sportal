@@ -1,5 +1,6 @@
 package example.sportal.model.pojo;
 
+import example.sportal.model.dto.article.CreateArticleDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,6 +17,10 @@ public class Article {
     private String fullText;
     private Timestamp createDateAndTime;
     private int views;
-    private String authorName;
     private long authorId;
+
+    public Article (CreateArticleDTO createArticleDTO){
+        this.setTitle(createArticleDTO.getTitle());
+        this.setFullText(createArticleDTO.getFullText());
+    }
 }

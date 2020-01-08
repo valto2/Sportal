@@ -13,8 +13,8 @@ import java.sql.SQLException;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
-public class UserController extends {
-    public static final String SESSION_KEY_LOGGED_USER = "logged_user";
+public class UserController extends AbstractController{
+
     @Autowired
     private UserDAO userDAO;
 
@@ -26,7 +26,7 @@ public class UserController extends {
         //add to database
         userDAO.registerUser(user);
         //return UserWithoutPasswordDTO
-        session.setAttribute(SESSION_KEY_LOGGED_USER, user);
+        session.setAttribute(LOGGED_USER_KEY_IN_SESSION, user);
         UserWithoutPasswordDTO responseDto = new UserWithoutPasswordDTO(user);
         return responseDto;
     }
