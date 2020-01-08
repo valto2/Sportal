@@ -15,12 +15,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
 
-<<<<<<< HEAD
-import static example.sportal.controllers.AbstractController.*;
-
-
-=======
->>>>>>> d20b3cf0a57f896e373941ee381bcefc0e44d0c1
 @RestController
 public class ArticlesCategoriesController extends AbstractController {
 

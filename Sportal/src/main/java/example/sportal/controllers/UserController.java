@@ -1,67 +1,88 @@
 package example.sportal.controllers;
 
+import example.sportal.SessionManager;
 import example.sportal.exceptions.AuthorizationException;
+import example.sportal.exceptions.BadRequestException;
 import example.sportal.model.dao.UserDAO;
 import example.sportal.model.dto.LoginUserDTO;
 import example.sportal.model.dto.RegisterUserDTO;
 import example.sportal.model.dto.UserWithoutPasswordDTO;
 import example.sportal.model.pojo.User;
+import example.sportal.model.repository.userRepository;
 import example.sportal.model.validations.UserValidations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.sql.SQLException;
 
-import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
-<<<<<<< HEAD
 public class UserController extends AbstractController {
-=======
-public class UserController extends AbstractController{
 
->>>>>>> d20b3cf0a57f896e373941ee381bcefc0e44d0c1
     @Autowired
     private UserDAO userDAO;
 
-    @PostMapping("/users")
-    public UserWithoutPasswordDTO register(@RequestBody RegisterUserDTO userDto, HttpSession session) throws SQLException {
-        //TODO validate data in userDto
-        //create User object
+    @Autowired
+    userRepository userRepository;
+
+    @PostMapping(value = "users/register")
+    public UserWithoutPasswordDTO register(@RequestBody RegisterUserDTO userDto, HttpSession session) throws BadRequestException, SQLException {
+        UserValidations.validateRegisterDto(userDto);
         User user = new User(userDto);
-        //add to database
-        userDAO.registerUser(user);
-        //return UserWithoutPasswordDTO
+        String encodedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()); /// TODO: 8.1.2020 г. BCrypt !/
+        System.out.println("Encoded password: " + encodedPassword);
+        user.setPassword(encodedPassword);
+        userDAO.addUser(user);
         session.setAttribute(LOGGED_USER_KEY_IN_SESSION, user);
         UserWithoutPasswordDTO responseDto = new UserWithoutPasswordDTO(user);
         return responseDto;
     }
 
-    @PostMapping("/users/login")
-    public UserWithoutPasswordDTO login(@RequestBody LoginUserDTO userDTO, HttpSession session) throws SQLException {
-        User user = userDAO.getByUsername(userDTO.getUsername());
+    @PostMapping(value = "users/login")
+    public UserWithoutPasswordDTO login(HttpSession session, @RequestBody LoginUserDTO userDTO)
+            throws BadRequestException {
+
+        User user = userRepository.getByUsername(userDTO.getUsername());
         if (user == null) {
-            throw new AuthorizationException("Invalid credentials");
-        } else if (UserValidations.isPasswordValid(userDTO.getPassword())) {
-            session.setAttribute(LOGGED_USER_KEY_IN_SESSION, user);
-            UserWithoutPasswordDTO responseDto = new UserWithoutPasswordDTO(user);
-            return responseDto;
-        } else {
-            throw new AuthorizationException("Invalid credentials");
+            System.out.println("User doesn't exists");
+            throw new BadRequestException("Invalid username or password!");
         }
+
+        if (!BCrypt.checkpw(userDTO.getPassword(), user.getPassword())) {
+            throw new BadRequestException("Invalid email or password!");
+        }
+
+        SessionManager.logUser(session, user);
+        UserWithoutPasswordDTO responseDto = new UserWithoutPasswordDTO(user);
+        return responseDto;  // not sure its working
     }
 
     @PostMapping("/users/logout")
-    public void login(HttpSession session) {
+    public void logout(HttpSession session) {
         session.invalidate();
     }
 
 }
 
-
-
-
+//    @PostMapping("/users/login")
+//        public UserWithoutPasswordDTO login (@RequestBody LoginUserDTO userDTO, HttpSession session) throws SQLException
+//        {
+//            User user = userRepository.getByUsername(userDTO.getUsername());
+//            if (user == null) {
+//                throw new AuthorizationException("Invalid credentials");
+//            } else if (UserValidations.(userDTO.getPassword());) {
+//                session.setAttribute(LOGGED_USER_KEY_IN_SESSION, user);
+//                UserWithoutPasswordDTO responseDto = new UserWithoutPasswordDTO(user);
+//                return responseDto;
+//            } else {
+//                throw new AuthorizationException("Invalid credentials");
+//            }
+//        }
 //    @GetMapping("/index")
 //    public String index() {
 //        return "home";

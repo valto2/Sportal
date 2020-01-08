@@ -5,8 +5,7 @@ import java.sql.SQLException;
 
 public interface IUserDAO {
 
-    void registerUser(User user) throws SQLException;
-//    int login(String email, String password) throws UserException;
+    void addUser(User user) throws SQLException;
     boolean checkIfUserExists(String email) throws SQLException;
     void updateUserInfo(User user) throws SQLException;
     User getUserByEmail(String email) throws SQLException;

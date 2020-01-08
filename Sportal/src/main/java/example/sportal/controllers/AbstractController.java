@@ -18,10 +18,10 @@ public abstract class AbstractController {
     static final String CREATE_NEW_ARTICLE = "newArticle";
     // responses
     static final String WRONG_CREDENTIALS = "Your username, email or password is wrong!";
-    static final String LOGIN_MESSAGES = "You must to log in!";
+    static final String LOGIN_MESSAGES = "You must be logged in!";
     static final String SOMETHING_WENT_WRONG = "Please try again!";
-    static final String EXISTS = "That object exists!";
-    static final String FAILED_CREDENTIALS = "Validate your data is failed!";
+    static final String EXISTS = "The Object already exists!";
+    static final String FAILED_CREDENTIALS = "Validating your data is failed!";
     private static final String TRY_AGAIN = "Please try again later!";
     static final String WRONG_INFORMATION = "Wrong information about the user or empty fields!";
     static final String COPYRIGHT = "Sportal holds the copyright of this article.";

@@ -11,6 +11,7 @@ import java.sql.*;
 @Component
 public class UserDAO implements IUserDAO {
 
+
     private static final String REGISTER_USER_SQL = "INSERT INTO users (" +
             "user_name, " +
             "user_password, " +
@@ -27,9 +28,8 @@ public class UserDAO implements IUserDAO {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-
     @Override
-    public void registerUser(User user) throws SQLException {
+    public void addUser(User user) throws SQLException {
         Connection connection = jdbcTemplate.getDataSource().getConnection();
         try (PreparedStatement ps = connection.prepareStatement(REGISTER_USER_SQL, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, user.getUsername());

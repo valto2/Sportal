@@ -20,11 +20,11 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column
+    @Column(name = "user_name")
     private String username;
-    @Column
+    @Column(name = "user_email")
     private String email;
-    @Column
+    @Column(name = "user_passsword")
     @JsonIgnore
     private String password;
     @Column
