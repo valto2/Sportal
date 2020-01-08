@@ -13,7 +13,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import static example.sportal.controllers.ResponseConstants.*;
+import static example.sportal.controllers.AbstractController.*;
+
 
 @RestController
 public class ArticlesCategoriesController {

@@ -12,7 +12,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import static example.sportal.controllers.ResponseConstants.*;
+import static example.sportal.controllers.AbstractController.EXISTS;
+import static example.sportal.controllers.AbstractController.WRONG_INFORMATION;
+
 
 @RestController
 public class PicturesController {

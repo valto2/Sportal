@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-import static example.sportal.controllers.ResponseConstants.*;
+import static example.sportal.controllers.AbstractController.NOT_EXISTS_OBJECT;
+import static example.sportal.controllers.AbstractController.WRONG_INFORMATION;
+
 
 
 @RestController
