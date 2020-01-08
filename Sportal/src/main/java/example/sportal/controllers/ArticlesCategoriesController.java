@@ -1,8 +1,8 @@
 package example.sportal.controllers;
 
 import example.sportal.model.dao.ArticlesCategoriesDAO;
+import example.sportal.model.pojo.Article;
 import example.sportal.model.pojo.Category;
-import example.sportal.model.pojo.POJO;
 import example.sportal.model.pojo.PageOfArticle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -51,9 +51,9 @@ public class ArticlesCategoriesController {
     // vasko : delete article by category id
 
     @GetMapping(value = "/articles/{category_id}")
-    public Collection<POJO> articleByCategoryId(@PathVariable(name = "category_id") Long categoryId,
+    public Collection<Article> articleByCategoryId(@PathVariable(name = "category_id") Long categoryId,
                                                 HttpServletResponse response) throws SQLException, IOException {
-        Collection<POJO> ListFromTitleOfArticles = this.articlesCategoriesDAO.allArticlesByCategoryID(categoryId);
+        Collection<Article> ListFromTitleOfArticles = this.articlesCategoriesDAO.allArticlesByCategoryID(categoryId);
         if (ListFromTitleOfArticles.isEmpty()) {
             response.setStatus(404);
             response.getWriter().append(NOT_EXISTS_OBJECT);
@@ -66,7 +66,7 @@ public class ArticlesCategoriesController {
     public void getAllCategoriesByArticleTitle(@PathVariable(name = "article_id") Long articleId,
                                                HttpServletResponse response,
                                                HttpSession session) throws SQLException, IOException {
-        Collection<POJO> listFromCategories = this.articlesCategoriesDAO.allCategoriesByArticlesID(articleId);
+        Collection<Category> listFromCategories = this.articlesCategoriesDAO.allCategoriesByArticlesID(articleId);
         PageOfArticle pageOfArticle = (PageOfArticle) session.getAttribute("pageOfArticle");
         pageOfArticle.setCategories(listFromCategories);
         session.setAttribute("pageOfArticle", pageOfArticle);

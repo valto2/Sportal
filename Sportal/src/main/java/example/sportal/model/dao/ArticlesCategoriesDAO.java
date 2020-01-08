@@ -5,7 +5,6 @@ import example.sportal.model.dao.interfaceDAO.IDAOExistsInThirdTable;
 import example.sportal.model.dao.interfaceDAO.IDAOManyToMany;
 import example.sportal.model.pojo.Article;
 import example.sportal.model.pojo.Category;
-import example.sportal.model.pojo.POJO;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +33,7 @@ public class ArticlesCategoriesDAO extends DAO
         this.jdbcTemplate.update(deleteDislikeSQL, leftColumn, rightColumn);
     }
 
-    public Collection<POJO> allArticlesByCategoryID(long categoryID) throws SQLException {
+    public Collection<Article> allArticlesByCategoryID(long categoryID) throws SQLException {
         String allCategories =
                 "SELECT a.id, a.title " +
                         "FROM articles AS a " +
@@ -42,7 +41,7 @@ public class ArticlesCategoriesDAO extends DAO
                         "JOIN categories AS c ON c.id = ac.category_id " +
                         "WHERE category_id = ?;";
         SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(allCategories, categoryID);
-        Collection<POJO> listWithCategories = new ArrayList<>();
+        Collection<Article> listWithCategories = new ArrayList<>();
         while (rowSet.next()) {
             listWithCategories.add(this.createArticleByRowSet(rowSet));
         }
@@ -57,7 +56,7 @@ public class ArticlesCategoriesDAO extends DAO
         return article;
     }
 
-    public Collection<POJO> allCategoriesByArticlesID(long articleID) throws SQLException {
+    public Collection<Category> allCategoriesByArticlesID(long articleID) throws SQLException {
         String allCategories =
                 "SELECT c.id, c.category_name " +
                         "FROM categories AS c " +
@@ -65,7 +64,7 @@ public class ArticlesCategoriesDAO extends DAO
                         "JOIN articles AS a ON a.id = ac.article_id " +
                         "WHERE article_id = ?;";
         SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(allCategories, articleID);
-        Collection<POJO> listWithCategories = new ArrayList<>();
+        Collection<Category> listWithCategories = new ArrayList<>();
         while (rowSet.next()) {
             listWithCategories.add(this.createCategoryByRowSet(rowSet));
         }

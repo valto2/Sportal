@@ -1,8 +1,6 @@
 package example.sportal.model.dao;
 
-import example.sportal.model.dao.interfaceDAO.IDAOAllPOJOById;
 import example.sportal.model.dao.interfaceDAO.IDAODeleteById;
-import example.sportal.model.pojo.POJO;
 import example.sportal.model.pojo.Picture;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -12,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Component
-public class PictureDAO extends DAO implements IDAODeleteById, IDAOAllPOJOById {
+public class PictureDAO extends DAO implements IDAODeleteById {
 
     public void addingOfPictureToTheArticle(Picture pictures) throws SQLException {
         String insertSQL = "INSERT INTO pictures (picture_url, article_id) VALUES (?, ?);";
@@ -26,11 +24,10 @@ public class PictureDAO extends DAO implements IDAODeleteById, IDAOAllPOJOById {
         return rowAffected;
     }
 
-    @Override
-    public Collection<POJO> allByID(long id) throws SQLException {
+    public Collection<Picture> allById(long id) throws SQLException {
         String allSQL = "SELECT id, picture_url, article_Id FROM pictures WHERE article_Id = ?;";
         SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(allSQL,id);
-        Collection<POJO> listWithPictures = new ArrayList<>();
+        Collection<Picture> listWithPictures = new ArrayList<>();
         while (rowSet.next()){
             listWithPictures.add(this.createPictureByRowSet(rowSet));
         }

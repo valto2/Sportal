@@ -1,8 +1,6 @@
 package example.sportal.controllers;
 
-import com.google.gson.Gson;
 import example.sportal.model.dao.PictureDAO;
-import example.sportal.model.pojo.POJO;
 import example.sportal.model.pojo.PageOfArticle;
 import example.sportal.model.pojo.Picture;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +51,7 @@ public class PicturesController {
     public void all(@PathVariable(name = "article_id") Long articleId,
                     HttpServletResponse response,
                     HttpSession session) throws SQLException, IOException {
-        Collection<POJO> listFromPictures = this.picturesDAO.allById(articleId);
+        Collection<Picture> listFromPictures = this.picturesDAO.allById(articleId);
         PageOfArticle pageOfArticle = (PageOfArticle) session.getAttribute("pageOfArticle");
         pageOfArticle.setPictures(listFromPictures);
         session.setAttribute("pageOfArticle", pageOfArticle);

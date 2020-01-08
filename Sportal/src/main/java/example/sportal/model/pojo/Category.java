@@ -7,7 +7,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Category implements POJO {
+public class Category {
 
     private int id;
     private String categoryName;

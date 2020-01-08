@@ -9,11 +9,11 @@ import java.util.Collection;
 @NoArgsConstructor
 @Getter
 @Setter
-public class PageOfArticle implements POJO{
+public class PageOfArticle {
 
     private Article article;
-    private Collection<POJO> categories;
-    private Collection<POJO> pictures;
+    private Collection<Category> categories;
+    private Collection<Picture> pictures;
     private Collection<Comment> comments;
     private int numberOfLikes;
 }
