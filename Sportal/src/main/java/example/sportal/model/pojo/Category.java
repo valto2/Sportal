@@ -1,5 +1,6 @@
 package example.sportal.model.pojo;
 
+import example.sportal.model.dto.category.NewCategoryDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,7 +10,10 @@ import lombok.Setter;
 @Setter
 public class Category {
 
-    private int id;
+    private long id;
     private String categoryName;
-    private long articleId;
+
+    public Category(NewCategoryDTO newCategoryDTO){
+        setCategoryName(newCategoryDTO.getCategoryName());
+    }
 }

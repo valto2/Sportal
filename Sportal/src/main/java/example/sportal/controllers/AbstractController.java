@@ -15,6 +15,7 @@ public abstract class AbstractController {
     static final String LOGGED_USER_KEY_IN_SESSION = "loggedUser";
     static final String RETURN_ARTICLE = "fullDataArticle";
     static final String CREATE_NEW_ARTICLE = "newArticle";
+
     // responses
     static final String WRONG_CREDENTIALS = "Your username, email or password is wrong!";
     static final String LOGIN_MESSAGES = "You must to log in!";
@@ -102,6 +103,18 @@ public abstract class AbstractController {
     @ExceptionHandler(SomethingWentWrongException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionObject handlerOfSomethingWentWrongException(Exception e) {
+        ExceptionObject exceptionObject = new ExceptionObject(
+                e.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                LocalDateTime.now(),
+                e.getClass().getName()
+        );
+        return exceptionObject;
+    }
+
+    @ExceptionHandler(TransactionException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ExceptionObject handlerOfTransactionException(Exception e) {
         ExceptionObject exceptionObject = new ExceptionObject(
                 e.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),

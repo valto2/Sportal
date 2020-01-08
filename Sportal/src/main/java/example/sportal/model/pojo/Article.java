@@ -1,6 +1,7 @@
 package example.sportal.model.pojo;
 
 import example.sportal.model.dto.article.CreateArticleDTO;
+import example.sportal.model.dto.article.EditArticleDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,5 +23,11 @@ public class Article {
     public Article (CreateArticleDTO createArticleDTO){
         this.setTitle(createArticleDTO.getTitle());
         this.setFullText(createArticleDTO.getFullText());
+    }
+
+    public  Article (EditArticleDTO editArticleDTO){
+        this.setId(editArticleDTO.getId());
+        this.setTitle(editArticleDTO.getTitle());
+        this.setFullText(editArticleDTO.getFullText());
     }
 }
