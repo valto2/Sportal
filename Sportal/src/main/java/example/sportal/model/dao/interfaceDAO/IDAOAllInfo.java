@@ -1,4 +1,4 @@
-package example.sportal.dao.interfaceDAO;
+package example.sportal.model.dao.interfaceDAO;
 
 import java.sql.SQLException;
 import java.util.Collection;

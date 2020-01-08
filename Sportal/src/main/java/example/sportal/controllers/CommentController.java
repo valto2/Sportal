@@ -1,12 +1,12 @@
 //package example.sportal.controllers;
 //
-//import example.sportal.dao.DBManager;
+//import example.sportal.model.dao.DBManager;
 //import example.sportal.exceptions.CommentException;
 //import example.sportal.exceptions.PostException;
 //import example.sportal.exceptions.UserException;
-//import example.sportal.model.Article;
-//import example.sportal.model.Comment;
-//import example.sportal.model.User;
+//import example.sportal.model.pojo.Article;
+//import example.sportal.model.pojo.Comment;
+//import example.sportal.model.pojo.User;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Component;
 //

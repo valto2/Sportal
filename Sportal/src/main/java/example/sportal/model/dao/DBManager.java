@@ -1,4 +1,4 @@
-package example.sportal.dao;
+package example.sportal.model.dao;
 
 import java.io.File;
 import java.io.FileInputStream;

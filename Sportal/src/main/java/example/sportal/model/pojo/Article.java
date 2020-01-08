@@ -1,4 +1,4 @@
-package example.sportal.model;
+package example.sportal.model.pojo;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,5 +17,5 @@ public class Article implements POJO {
     private Timestamp createDateAndTime;
     private int views;
     private String authorName;
-    private long authorID;
+    private long authorId;
 }

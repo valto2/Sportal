@@ -1,8 +1,8 @@
-package example.sportal.dao;
+package example.sportal.model.dao;
 
-import example.sportal.model.Article;
-import example.sportal.model.Comment;
-import example.sportal.model.User;
+import example.sportal.model.pojo.Article;
+import example.sportal.model.pojo.Comment;
+import example.sportal.model.pojo.User;
 import example.sportal.exceptions.CommentException;
 
 import java.sql.*;

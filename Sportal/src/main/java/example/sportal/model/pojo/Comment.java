@@ -1,4 +1,4 @@
-package example.sportal.model;
+package example.sportal.model.pojo;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +15,9 @@ public class Comment {
     private String fullCommentText;
     private Timestamp timePosted;
     private long userID;
+    private String userName;
     private long articleID;
     private long reply_id;
+    private int numberOfLikes;
+    private int numberOfDislike;
 }

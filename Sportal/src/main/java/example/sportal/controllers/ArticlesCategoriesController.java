@@ -1,9 +1,9 @@
 package example.sportal.controllers;
 
-import com.google.gson.Gson;
-import example.sportal.dao.ArticlesCategoriesDAO;
-import example.sportal.model.Category;
-import example.sportal.model.POJO;
+import example.sportal.model.dao.ArticlesCategoriesDAO;
+import example.sportal.model.pojo.Category;
+import example.sportal.model.pojo.POJO;
+import example.sportal.model.pojo.PageOfArticle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,62 +21,55 @@ public class ArticlesCategoriesController {
     @Autowired
     private ArticlesCategoriesDAO articlesCategoriesDAO;
 
-    @PostMapping(value = "/admin/add_category/to_article")
-    public String addCategoryToArticle(@RequestBody Category category,
-                                       HttpServletResponse response,
-                                       HttpSession session) throws IOException, SQLException {
-        if (session.getAttribute("userID") == null) {
-            response.sendRedirect("/user/loginForm");
+    @PostMapping(value = "/articles/add_category")
+    public void addCategoryToArticle(@RequestBody Category category,
+                                     HttpServletResponse response,
+                                     HttpSession session) throws IOException, SQLException {
+        if (session.getAttribute("userId") == null) {
+            response.sendRedirect("/login");
         }
         Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
         if (!isAdmin) {
             response.setStatus(400);
-            return WRONG_INFORMATION;
+            response.getWriter().append(WRONG_INFORMATION);
         }
-        if (category == null || category.getId() == 0) {
+        if (category == null || category.getId() == 0 || category.getArticleId() == 0) {
             response.setStatus(400);
-            return WRONG_REQUEST;
+            response.getWriter().append(WRONG_REQUEST);
         }
-        if (session.getAttribute("articleID") == null) {
-            response.sendRedirect("/articles/all_title");
+        // vasko : exists article by id and exists category by id
+        if (this.articlesCategoriesDAO.existsInThirdTable(category.getArticleId(), category.getId())) {
+            response.getWriter().append(EXISTS);
         }
-        long articleID = (long) session.getAttribute("articleID");
-        if (this.articlesCategoriesDAO.existsInThirdTable(articleID, category.getId())) {
-            return EXISTS;
+        if (this.articlesCategoriesDAO.addInThirdTable(category.getArticleId(), category.getId())) {
+            // vasko : return - what object?
+            response.getWriter().append("Added category to article!");
         }
-        if (this.articlesCategoriesDAO.addInThirdTable(articleID, category.getId())) {
-            return "Added category to article!";
-        }
-        return "Please try again!";
     }
 
-    @GetMapping(value = "/all_articles/by_categoryID")
-    public String articleFromSpecificCategory(HttpServletResponse response,
-                                              HttpSession session) throws SQLException, IOException {
-        if (session.getAttribute("categoryID") == null) {
-            response.sendRedirect("/all_categories_name");
-        }
-        long categoryID = (long) session.getAttribute("categoryID");
-        Collection<POJO> ListFromTitleOfArticles = this.articlesCategoriesDAO.allArticlesByCategoryID(categoryID);
+    // vasko : delete category by article id
+    // vasko : delete article by category id
+
+    @GetMapping(value = "/articles/{category_id}")
+    public Collection<POJO> articleByCategoryId(@PathVariable(name = "category_id") Long categoryId,
+                                                HttpServletResponse response) throws SQLException, IOException {
+        Collection<POJO> ListFromTitleOfArticles = this.articlesCategoriesDAO.allArticlesByCategoryID(categoryId);
         if (ListFromTitleOfArticles.isEmpty()) {
             response.setStatus(404);
-            return new Gson().toJson(NOT_EXISTS_OBJECT);
+            response.getWriter().append(NOT_EXISTS_OBJECT);
         }
-        return new Gson().toJson(ListFromTitleOfArticles);
+        // vasko : return articleDTO
+        return ListFromTitleOfArticles;
     }
 
-    @GetMapping(value = "/all/categories_of_articleID")
-    public String getAllCategoriesByArticleTitle(HttpServletResponse response,
-                                                 HttpSession session) throws SQLException, IOException {
-        if (session.getAttribute("articleID") == null) {
-            response.sendRedirect("/articles/all_title");
-        }
-        long articleID = (long) session.getAttribute("articleID");
-        Collection<POJO> listFromNameOfCategories = this.articlesCategoriesDAO.allCategoriesByArticlesID(articleID);
-        if (listFromNameOfCategories.isEmpty()) {
-            response.setStatus(404);
-            return new Gson().toJson(NOT_EXISTS_OBJECT);
-        }
-        return new Gson().toJson(listFromNameOfCategories);
+    @GetMapping(value = "/categories/{article_id}")
+    public void getAllCategoriesByArticleTitle(@PathVariable(name = "article_id") Long articleId,
+                                               HttpServletResponse response,
+                                               HttpSession session) throws SQLException, IOException {
+        Collection<POJO> listFromCategories = this.articlesCategoriesDAO.allCategoriesByArticlesID(articleId);
+        PageOfArticle pageOfArticle = (PageOfArticle) session.getAttribute("pageOfArticle");
+        pageOfArticle.setCategories(listFromCategories);
+        session.setAttribute("pageOfArticle", pageOfArticle);
+        response.sendRedirect("/pictures/" + articleId);
     }
 }

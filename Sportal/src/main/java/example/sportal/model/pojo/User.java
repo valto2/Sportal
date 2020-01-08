@@ -1,4 +1,4 @@
-package example.sportal.model;
+package example.sportal.model.pojo;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

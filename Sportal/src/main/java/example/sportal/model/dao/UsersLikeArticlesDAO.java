@@ -1,9 +1,9 @@
-package example.sportal.dao;
+package example.sportal.model.dao;
 
-import example.sportal.dao.interfaceDAO.IDAOAllNumberByID;
-import example.sportal.dao.interfaceDAO.IDAODeleteFromThirdTable;
-import example.sportal.dao.interfaceDAO.IDAOExistsInThirdTable;
-import example.sportal.dao.interfaceDAO.IDAOManyToMany;
+import example.sportal.model.dao.interfaceDAO.IDAOAllNumberById;
+import example.sportal.model.dao.interfaceDAO.IDAODeleteFromThirdTable;
+import example.sportal.model.dao.interfaceDAO.IDAOExistsInThirdTable;
+import example.sportal.model.dao.interfaceDAO.IDAOManyToMany;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import java.sql.SQLException;
 
 @Component
 public class UsersLikeArticlesDAO extends DAO
-        implements IDAOManyToMany, IDAODeleteFromThirdTable, IDAOAllNumberByID, IDAOExistsInThirdTable {
+        implements IDAOManyToMany, IDAODeleteFromThirdTable, IDAOAllNumberById, IDAOExistsInThirdTable {
 
     @Override
     public boolean addInThirdTable(long leftColumn, long rightColumn) throws SQLException {
@@ -30,7 +30,7 @@ public class UsersLikeArticlesDAO extends DAO
     }
 
     @Override
-    public int allByID(long id) throws SQLException {
+    public int allById(long id) throws SQLException {
         String countLikesSQL = "SELECT COUNT(user_id) AS number_likes FROM users_like_articles WHERE article_id = ?;";
         SqlRowSet rowSet = this.jdbcTemplate.queryForRowSet(countLikesSQL, id);
         if (rowSet.next()) {

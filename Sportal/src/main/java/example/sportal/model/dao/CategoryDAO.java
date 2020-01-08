@@ -1,9 +1,9 @@
-package example.sportal.dao;
+package example.sportal.model.dao;
 
-import example.sportal.dao.interfaceDAO.IDAOAllInfo;
-import example.sportal.dao.interfaceDAO.IDAODeleteByID;
-import example.sportal.dao.interfaceDAO.IDAOReturnPOJOIDIfExistsInTable;
-import example.sportal.model.Category;
+import example.sportal.model.dao.interfaceDAO.IDAOAllInfo;
+import example.sportal.model.dao.interfaceDAO.IDAODeleteById;
+import example.sportal.model.dao.interfaceDAO.IDAOReturnPOJOIDIfExistsInTable;
+import example.sportal.model.pojo.Category;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ import java.util.List;
 
 @Component
 public class CategoryDAO extends DAO
-        implements IDAODeleteByID, IDAOAllInfo, IDAOReturnPOJOIDIfExistsInTable {
+        implements IDAODeleteById, IDAOAllInfo, IDAOReturnPOJOIDIfExistsInTable {
 
 
     public void addCategory(Category category) throws SQLException {
@@ -23,7 +23,7 @@ public class CategoryDAO extends DAO
     }
 
     @Override
-    public int deleteByID(long id) throws SQLException {
+    public int deleteById(long id) throws SQLException {
         String deleteCategorySQL= "DELETE FROM categories WHERE id = ?;";
         return this.jdbcTemplate.update(deleteCategorySQL,id);
     }

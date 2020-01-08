@@ -1,7 +1,7 @@
 package example.sportal.controllers;
 
-import com.google.gson.Gson;
-import example.sportal.dao.UsersLikeArticlesDAO;
+import example.sportal.model.dao.UsersLikeArticlesDAO;
+import example.sportal.model.pojo.PageOfArticle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,33 +16,36 @@ public class LikeArticleController {
     @Autowired
     private UsersLikeArticlesDAO likeArticlesDAO;
 
-    @PostMapping(value = "/user/like/article")
-    public String likeArticle(HttpServletResponse response,
-                              HttpSession session) throws IOException, SQLException {
-        if (session.getAttribute("userID") == null) {
-            response.sendRedirect("/user/loginForm");
+    @PostMapping(value = "/likes_articles")
+    public String add(HttpServletResponse response,
+                      HttpSession session) throws IOException, SQLException {
+        if (session.getAttribute("userId") == null) {
+            response.sendRedirect("/login");
         }
-        long userID = (long) session.getAttribute("userID");
-        if (session.getAttribute("articleID") == null) {
-            response.sendRedirect("/all_categories");
+        long userId = (long) session.getAttribute("userId");
+        if (session.getAttribute("articleId") == null) {
+            response.sendRedirect("/categories");
         }
-        long articleID = (long) session.getAttribute("articleID");
-        if (this.likeArticlesDAO.existsInThirdTable(articleID, userID)) {
-            return new Gson().toJson("Without more likes from you on this article!");
+        long articleId = (long) session.getAttribute("articleId");
+        if (this.likeArticlesDAO.existsInThirdTable(articleId, userId)) {
+            return "Without more likes from you on this article!";
         }
-        if(this.likeArticlesDAO.addInThirdTable(articleID, userID)){
+        if (this.likeArticlesDAO.addInThirdTable(articleId, userId)) {
             return "Likes article!";
         }
+        // vasko : return - what object?
         return "Please try again!";
     }
 
-    @GetMapping(value = "/all_like/article")
-    public int totalLikesByArticleID(HttpServletResponse response,
-                                     HttpSession session) throws SQLException, IOException {
-        if (session.getAttribute("articleID") == null) {
-            response.sendRedirect("/all_categories");
-        }
-        long articleID = (long) session.getAttribute("articleID");
-        return this.likeArticlesDAO.allByID(articleID);
+    @GetMapping(value = "/likes_articles/{article_id}")
+    public void all(@PathVariable("article_id") Long articleID,
+                    HttpServletResponse response,
+                    HttpSession session) throws SQLException, IOException {
+        PageOfArticle pageOfArticle = (PageOfArticle) session.getAttribute("pageOfArticle");
+        pageOfArticle.setNumberOfLikes(this.likeArticlesDAO.allById(articleID));
+        session.setAttribute("pageOfArticle", pageOfArticle);
+        response.sendRedirect("/all_data_of_articles");
     }
+
+    // vasko : delete
 }
