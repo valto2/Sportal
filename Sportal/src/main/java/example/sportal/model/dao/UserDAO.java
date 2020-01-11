@@ -1,22 +1,27 @@
 package example.sportal.model.dao;
 
+import example.sportal.model.pojo.Comment;
 import example.sportal.model.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 
 @Component
-public class UserDAO implements IUserDAO {
-
-
+public class UserDAO {
+    private static final String GET_COMMENTS_SQL = "SELECT id" + "FROM `technopolis`.orders" + "WHERE user_id = ?;"; // TODO: 10.1.2020 г.  
+    private static final String IS_ADMIN_SQL = "SELECT is_admin FROM users WHERE id = ?;";
+    private static final String SELECT_USER_BY_EMAIL = "SELECT * FROM users WHERE user_email = ?;";
+    private static final String DELETE_USER_SQL = "DELETE FROM users WHERE id = ?;";
     private static final String REGISTER_USER_SQL = "INSERT INTO users (" +
             "user_name, " +
             "user_password, " +
             "user_email, " +
             "VALUES (?,?,?);";
+
     private static final String SELECT_USER_BY_USERNAME = "SELECT " +
             "id, " +
             "user_name, " +
@@ -25,28 +30,73 @@ public class UserDAO implements IUserDAO {
             "FROM users " +
             "WHERE user_name = ?;";
 
+    private static final String EDIT_USER_SQL = "UPDATE users" +
+            "SET " +
+            "user_name = ?" +
+            "user_password?" +
+            "user_email = ?" +
+            "WHERE id = ?;";
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Override
     public void addUser(User user) throws SQLException {
-        Connection connection = jdbcTemplate.getDataSource().getConnection();
-        try (PreparedStatement ps = connection.prepareStatement(REGISTER_USER_SQL, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, user.getUsername());
-            ps.setString(2, user.getPassword());
-            ps.setString(3, user.getEmail());
-            ps.executeUpdate();
-            ResultSet keys = ps.getGeneratedKeys();
+        try ( Connection connection = jdbcTemplate.getDataSource().getConnection();
+              PreparedStatement statement = connection.prepareStatement(REGISTER_USER_SQL, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, user.getUsername());
+            statement.setString(2, user.getPassword());
+            statement.setString(3, user.getEmail());
+            statement.executeUpdate();
+            ResultSet keys = statement.getGeneratedKeys();
             keys.next();
             user.setId(keys.getLong(1));
         }
     }
 
+    public User deleteUser(User user) throws SQLException {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(DELETE_USER_SQL)) {
+            statement.setLong(1, user.getId());
+            statement.execute();
+        }
+        return user;
+    }
+
+    public User editUser(User user) throws SQLException {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(EDIT_USER_SQL)) {
+            statement.setString(1, user.getUsername());
+            statement.setString(2, user.getPassword());
+            statement.setString(3, user.getEmail());
+            statement.executeUpdate();
+        }
+        return user;
+    }
+
+    public ArrayList<Comment> getComments(long userId) throws SQLException {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(GET_COMMENTS_SQL)) {
+            statement.setLong(1, userId);
+            ArrayList<Comment> comments = new ArrayList<>();
+            ResultSet result = statement.executeQuery();
+            while (result.next()) {
+                Comment comment = new Comment(
+                        result.getLong("id"),
+                        result.getString("full_comment_text"),
+                        result.getTimestamp("date_published").toLocalDateTime(),
+                        result.getLong("user_id"),
+                        result.getLong("article_id"));
+                comments.add(comment);
+            }
+            return comments;
+        }
+    }
+
     public User getByUsername(String username) throws SQLException {
-        Connection connection = jdbcTemplate.getDataSource().getConnection();
-        try (PreparedStatement ps = connection.prepareStatement(SELECT_USER_BY_USERNAME, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, username);
-            ResultSet rows = ps.executeQuery();
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_USER_BY_USERNAME)) {
+            statement.setString(1, username);
+            ResultSet rows = statement.executeQuery();
             if (rows.next()) {
                 return new User(rows.getLong("id"),
                         rows.getString("user_name"),
@@ -59,12 +109,22 @@ public class UserDAO implements IUserDAO {
         }
     }
 
-    @Override
+    public boolean isAdminByUserId(Integer id) throws SQLException {
+        boolean isAdmin = false;
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(IS_ADMIN_SQL)) {
+            statement.setInt(1, id);
+            ResultSet set = statement.executeQuery();
+            set.next();
+            isAdmin = set.getBoolean("is_admin");
+        }
+        return isAdmin;
+    }
+
     public User getUserByEmail(String email) throws SQLException {
-        Connection connection = DBManager.getInstance().getConnection();
-        String sql = "SELECT * FROM users WHERE user_email = ?;";
         User user = null;
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_USER_BY_EMAIL)) {
             statement.setString(1, email);
             ResultSet set = statement.executeQuery();
             if (!set.next()) {
@@ -78,125 +138,4 @@ public class UserDAO implements IUserDAO {
         }
         return user;
     }
-
-    @Override
-    public boolean isAdminByUserId(Integer id) throws SQLException {
-        Connection connection = DBManager.getInstance().getConnection();
-        String sql = "SELECT is_admin FROM users WHERE id = ?;";
-        boolean isAdmin = false;
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, id);
-            ResultSet set = statement.executeQuery();
-            set.next();
-            isAdmin = set.getBoolean("is_admin");
-        }
-        return isAdmin;
-    }
-
-    @Override
-    public boolean checkIfUserExists(String email) throws SQLException {
-        Connection connection = DBManager.getInstance().getConnection();
-        String sql = "SELECT id FROM users WHERE email = ?;";
-        boolean exist = false;
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, email);
-            ResultSet set = statement.executeQuery();
-            exist = set.next();
-        }
-        return exist;
-    }
-
-    @Override
-    public void updateUserInfo(User user) throws SQLException {
-        Connection connection = DBManager.getInstance().getConnection();
-        String sql = "UPDATE users SET  = user_name = ? , emial = ?, password = ? WHERE id = ?;";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getPassword());
-            statement.setLong(4, user.getId());
-            statement.executeUpdate();
-        }
-    }
 }
-//    private static UserDAO mInstance;
-
-//    private UserDAO() {
-//    }
-//
-//    public static UserDAO getInstance() {
-//        if (mInstance == null) {
-//            mInstance = new UserDAO();
-//        }
-//        return mInstance;
-//    }
-
-//    @Override
-//    // register
-//    public void registerUser(User user) throws SQLException {
-//        Connection connection = DBManager.getInstance().getConnection();
-//        String sql = "INSERT INTO users (user_name, email, password)" +
-//                " VALUES (?, ?,md5(?));";
-//        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-//            statement.setString(1, user.getUsername());
-//            statement.setString(2, user.getEmail());
-//            statement.setString(3, user.getPassword());
-//            statement.executeUpdate();
-//        }
-//    }
-//        VALIDATIONS ===========================================================================
-//        try {
-//            if (isDuplicateName(user.getUsername())) {
-//                throw new UserException("The username is already taken. Please use a different one");
-//            }
-//            if (isDuplicateEmail(user.getEmail())) {
-//                throw new UserException("E-mail is already taken. Please use a different one.");
-//            }
-//        VALIDATIONS ===========================================================================
-
-//    //     check existing name
-//    private boolean isDuplicateName(String name) throws SQLException {
-//        Connection connection = DBManager.INSTANCE.getConnection();
-//        String sql = "SELECT * FROM users WHERE user_name = ?;";
-//        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-//            statement.setString(1, name);
-//            ResultSet resultSet = statement.executeQuery();
-//            if (resultSet.next() == false) {
-//                return false;
-//            }
-//            return true;
-//        }
-//    }
-//
-//    // check existing email
-//    private boolean isDuplicateEmail(String email) throws SQLException {
-//        Connection connection = DBManager.INSTANCE.getConnection();
-//        String sql = "SELECT * FROM users WHERE user_email = ?;";
-//        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-//            statement.setString(1, email);
-//            ResultSet resultSet = statement.executeQuery();
-//            if (resultSet.next() == false) {
-//                return false;
-//            }
-//            return true;
-//        }
-//    }
-//    @Override
-//    public int login(String email, String password) throws UserException {
-//        try {
-//            Connection connection = DBManager.INSTANCE.getConnection();
-//            String sql = "SELECT id FROM users WHERE email = ? AND password = md5(?);";
-//            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-//                statement.setString(1, email);
-//                statement.setString(2, password);
-//                ResultSet resultSet = statement.executeQuery();
-//                if (!resultSet.next()) {
-//                    throw new UserException("Invalid email or password!");
-//                }
-//                int userId = resultSet.getInt(1);
-//                return userId;
-//            }
-//        } catch (SQLException e) {
-//            throw new UserException("Could not login! Please try again later!", e);
-//        }
-//    }

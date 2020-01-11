@@ -20,7 +20,9 @@ public abstract class AbstractController {
     static final String WRONG_CREDENTIALS = "Your username, email or password is wrong!";
     static final String LOGIN_MESSAGES = "You must be logged in!";
     static final String SOMETHING_WENT_WRONG = "Please try again!";
+    static final String PASSWORD_NOT_MATCH = "Your password does not match!";
 
+    static final String USER_DOES_NOT_EXISTS = "The user does not exists!";
     static final String EXISTS = "The Object already exists!";
     static final String FAILED_CREDENTIALS = "Validating your data is failed!";
     private static final String TRY_AGAIN = "Please try again later!";

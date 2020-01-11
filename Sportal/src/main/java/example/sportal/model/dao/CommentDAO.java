@@ -4,71 +4,57 @@ import example.sportal.model.pojo.Article;
 import example.sportal.model.pojo.Comment;
 import example.sportal.model.pojo.User;
 import example.sportal.exceptions.CommentException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import lombok.SneakyThrows;
 
 import java.sql.*;
 
+@Component
 public class CommentDAO {
 
-    private static CommentDAO instance = new CommentDAO();
+    private static final String INSERT_LIKE_COMMENT_SQL = "INSERT INTO users_like_comments VALUES (? , ?);";
+    private static final String INSERT_DISLIKE_COMMENT_SQL = "INSERT INTO users_disliked_comments VALUES (? , ?);";
+    private static final String DISLIKED_COMMENTS_SQL = "SELECT * FROM users_disliked_comments WHERE user_id = ? AND comment_id = ?;";
+    private static final String LIKED_COMMENTS_SQL = "SELECT * FROM users_like_comments WHERE user_id = ? AND comment_id = ?;";
+    private static final String UPDATE_COMMENT_SQL = "UPDATE comments SET full_comment_text = ? WHERE id = ?";
+    private static final String DELETE_DISLIKED_COMMENTS_SQL = "DELETE FROM users_disliked_comments WHERE user_id = ? AND comment_id = ?";
+    private static final String DELETE_LIKED_COMMENTS_SQL = "DELETE FROM users_like_comments WHERE user_id = ? AND comment_id = ?";
+    private static final String INSTERT_COMMENT_SQL = "INSERT INTO comments " +
+            "(full_comment_text, date_published, user_id, article_id) VALUES" + "(?,?,?,?);";
 
-    public static CommentDAO getInstance() {
-        return instance;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    private CommentDAO() {
     }
 
-    private CommentDAO(){}
-
-    public void addCommentToArticle(Article article, Comment comment) throws CommentException {
+    public void addComment(Article article, Comment comment) throws CommentException {
         try {
-            Connection connection = DBManager.INSTANCE.getConnection();
-            String sql = "insert into comments " +
-                    "(text, time_posted, owner_id, article_id) values" +
-                    "(?,?,?,?);";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            Connection connection = jdbcTemplate.getDataSource().getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(INSTERT_COMMENT_SQL, Statement.RETURN_GENERATED_KEYS);
+            Timestamp timestamp = Timestamp.valueOf(comment.getTimePosted());
             preparedStatement.setString(1, comment.getFullCommentText());
-            preparedStatement.setTimestamp(2, comment.getTimePosted());
+            preparedStatement.setTimestamp(2, timestamp);
+            preparedStatement.setLong(3, comment.getArticleID());
+            preparedStatement.setLong(4, comment.getUserID());
             comment.setArticleID(article.getId());
-            preparedStatement.setLong(3, comment.getArticleID());
-            preparedStatement.setLong(4,  comment.getUserID());
-            preparedStatement.executeUpdate();
-            ResultSet resultSet = preparedStatement.getGeneratedKeys();
-            resultSet.next();
-            int comment_id = resultSet.getInt(1);
-            comment.setId(comment_id);
-        }catch (SQLException e) {
-            throw new CommentException("Failed to add comment. Please try again later.", e);
-        }
-    }
-
-    public void addReplyToComment(Comment parentComment, Comment comment) throws CommentException{
-        try {
-            Connection connection = DBManager.INSTANCE.getConnection();
-            String sql = "insert into comments " +
-                    "(text, time_posted, article_id, user_id, replied_to_id) values" +
-                    "(?,?,?,?,?);";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, comment.getFullCommentText());
-            preparedStatement.setTimestamp(2, comment.getTimePosted());
-            comment.setArticleID(parentComment.getArticleID());
-            preparedStatement.setLong(3, comment.getArticleID());
-            preparedStatement.setLong(4,  comment.getUserID());
-            comment.setReply_id(parentComment.getId());
-            preparedStatement.setLong(5,  comment.getReply_id());
             preparedStatement.executeUpdate();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
             resultSet.next();
             int comment_id = resultSet.getInt(1);
             comment.setId(comment_id);
         } catch (SQLException e) {
-            throw  new CommentException("Failed to reply on comment. Please, try again later.", e);
+            throw new CommentException("Failed to add comment. Please try again later.", e);
         }
     }
 
     public void editComment(String editedText, Comment comment) throws CommentException {
         try {
-            Connection connection = DBManager.INSTANCE.getConnection();
+            Connection connection = jdbcTemplate.getDataSource().getConnection();
             comment.setFullCommentText(editedText);
-            String sql = "update comments set full_comment_text = ? where id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_COMMENT_SQL);
             preparedStatement.setString(1, comment.getFullCommentText());
             preparedStatement.setLong(2, comment.getId());
             preparedStatement.executeUpdate();
@@ -78,11 +64,11 @@ public class CommentDAO {
     }
 
     public void deleteComment(Comment comment) throws CommentException {
-        try{
-            Connection connection = DBManager.INSTANCE.getConnection();
-            String deleteFromComments = "delete from comments where id = ? or reply_id = ?;";
-            String deleteFromLikes = "delete from users_liked_comments where comment_id = ?";
-            String deleteFromDislikes = "delete from users_disliked_comments where comment_id = ?";
+        try {
+            Connection connection = jdbcTemplate.getDataSource().getConnection();
+            String deleteFromComments = "DELETE FROM comments WHERE id = ?;";
+            String deleteFromLikes = "DELETE FROM users_like_comments WHERE comment_id = ?";
+            String deleteFromDislikes = "DELETE FROM users_disliked_comments WHERE comment_id = ?";
 
             try (PreparedStatement deleteFromCommentsStatement = connection.prepareStatement(deleteFromComments);
                  PreparedStatement deleteFromLikesStatement = connection.prepareStatement(deleteFromLikes);
@@ -106,11 +92,10 @@ public class CommentDAO {
 
                 connection.commit();
 
-            }catch (SQLException e) {
+            } catch (SQLException e) {
                 connection.rollback();
                 throw new CommentException("Failed to delete comment.", e);
-            }
-            finally {
+            } finally {
                 connection.setAutoCommit(true);
             }
         } catch (SQLException e) {
@@ -118,110 +103,112 @@ public class CommentDAO {
         }
     }
 
-    public void likeComment(User user, Comment comment) throws CommentException {
-        try {
-            Connection connection = DBManager.INSTANCE.getConnection();
-            if(commentIsLiked(user, comment)){
-                setForeignKeysToZero(connection);
-                String unlike = "delete from users_liked_comments where user_id = ? and comment_id = ?";
-                PreparedStatement preparedStatement = connection.prepareStatement(unlike);
-                preparedStatement.setLong(1, user.getId());
-                preparedStatement.setLong(2, comment.getId());
-                preparedStatement.executeUpdate();
-                setForeignKeysToOne(connection);
-            }
-            else {
-                if(commentIsDisliked(user, comment)){
-                    setForeignKeysToZero(connection);
-                    String sql = "delete from users_disliked_comments where user_id = ? and comment_id = ?";
-                    PreparedStatement preparedStatement = connection.prepareStatement(sql);
+    @SneakyThrows
+    public String dislikeComment(User user, Comment comment) {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            //removes comment from disliked comments
+            if (commentIsAlreadyDisliked(user, comment)) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_DISLIKED_COMMENTS_SQL)) {
                     preparedStatement.setLong(1, user.getId());
                     preparedStatement.setLong(2, comment.getId());
                     preparedStatement.executeUpdate();
-                    setForeignKeysToOne(connection);
                 }
-                String like = "insert into users_liked_comments values (? , ?);";
-                PreparedStatement preparedStatement = connection.prepareStatement(like);
-                preparedStatement.setLong(1, user.getId());
-                preparedStatement.setLong(2, comment.getId());
-                preparedStatement.executeUpdate();
+                return "Removed dislike!";
+            } else {
+                //removes comment from liked comments
+                try {
+                    connection.setAutoCommit(false);
+                    if (commentIsAlreadyLiked(user, comment)) {
+                        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_LIKED_COMMENTS_SQL)) {
+                            preparedStatement.setLong(1, user.getId());
+                            preparedStatement.setLong(2, comment.getId());
+                            preparedStatement.executeUpdate();
+                        }
+                    }
+                    //adds comment to disliked comments
+                    try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_DISLIKE_COMMENT_SQL)) {
+                        preparedStatement.setLong(1, user.getId());
+                        preparedStatement.setLong(2, comment.getId());
+                        preparedStatement.executeUpdate();
+                    }
+                    connection.commit();
+                    connection.setAutoCommit(true);
+                    return "Comment disliked!";
+                } catch (SQLException e) {
+                    connection.rollback();
+                    throw new SQLException("Connection rollback for disliking comment!", e);
+                }
             }
-
-        } catch (SQLException e) {
-            throw new CommentException("Failed to like comment. Please, try again later.",e);
         }
     }
 
-    public void dislikeComment(User user, Comment comment) throws CommentException {
-        try {
-            Connection connection = DBManager.INSTANCE.getConnection();
-            if(commentIsDisliked(user, comment)){
-                setForeignKeysToZero(connection);
-                String sql = "delete from users_disliked_comments where user_id = ? and comment_id = ?";
-                PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                preparedStatement.setLong(1, user.getId());
-                preparedStatement.setLong(2, comment.getId());
-                preparedStatement.executeUpdate();
-                setForeignKeysToOne(connection);
-            }
-            else {
-                if(commentIsLiked(user, comment)){
-                    setForeignKeysToZero(connection);
-                    String unlike = "delete from users_liked_comments where user_id = ? and comment_id = ?";
-                    PreparedStatement preparedStatement = connection.prepareStatement(unlike);
+    @SneakyThrows
+    public String likeComment(User user, Comment comment) {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            //removes comment from liked comments
+            if (commentIsAlreadyLiked(user, comment)) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_LIKED_COMMENTS_SQL)) {
                     preparedStatement.setLong(1, user.getId());
                     preparedStatement.setLong(2, comment.getId());
                     preparedStatement.executeUpdate();
-                    setForeignKeysToOne(connection);
                 }
-                String dislike = "insert into users_disliked_comments values (? , ?);";
-                PreparedStatement preparedStatement = connection.prepareStatement(dislike);
-                preparedStatement.setLong(1, user.getId());
-                preparedStatement.setLong(2, comment.getId());
-                preparedStatement.executeUpdate();
+                return "Removed like!";
+            } else {
+                //removes comment from disliked comments
+                try {
+                    connection.setAutoCommit(false);
+                    if (commentIsAlreadyDisliked(user, comment)) {
+                        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_DISLIKED_COMMENTS_SQL)) {
+                            preparedStatement.setLong(1, user.getId());
+                            preparedStatement.setLong(2, comment.getId());
+                            preparedStatement.executeUpdate();
+                        }
+                    }
+                    try (PreparedStatement statement = connection.prepareStatement(INSERT_LIKE_COMMENT_SQL)) {
+                        statement.setLong(1, user.getId());
+                        statement.setLong(2, comment.getId());
+                        statement.executeUpdate();
+                    }
+                    connection.commit();
+                    connection.setAutoCommit(true);
+                    return "Comment liked!";
+                } catch (SQLException e) {
+                    connection.rollback();
+                    throw new SQLException("Connection rollback for liking comment!", e);
+                }
             }
-        } catch (SQLException e) {
-            throw new CommentException("Failed to dislike comment. Please, try again later.",e);
         }
     }
-
+    //finds if the current comment is already liked
+    private boolean commentIsAlreadyLiked(User user, Comment comment) throws SQLException {
+        Connection connection = jdbcTemplate.getDataSource().getConnection();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(LIKED_COMMENTS_SQL)) {
+            preparedStatement.setLong(1, user.getId());
+            preparedStatement.setLong(2, comment.getId());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
+        }
+    }
+    //finds if the current comment is already disliked
+    private boolean commentIsAlreadyDisliked(User user, Comment comment) throws SQLException {
+        Connection connection = jdbcTemplate.getDataSource().getConnection();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(DISLIKED_COMMENTS_SQL)) {
+            preparedStatement.setLong(1, user.getId());
+            preparedStatement.setLong(2, comment.getId());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
+        }
+    }
     //unlocks the table to delete constrained rows
     private void setForeignKeysToZero(Connection connection) throws SQLException {
-        String setFKChecksToZero = "set FOREIGN_KEY_CHECKS = 0;";
+        String setFKChecksToZero = "SET FOREIGN_KEY_CHECKS = 0;";
         PreparedStatement preparedStatementFKZero = connection.prepareStatement(setFKChecksToZero);
         preparedStatementFKZero.executeUpdate();
     }
-
     //locks the table to delete constrained rows
     private void setForeignKeysToOne(Connection connection) throws SQLException {
-        String setFKChecksToOne = "set FOREIGN_KEY_CHECKS = 1;";
+        String setFKChecksToOne = "SET FOREIGN_KEY_CHECKS = 1;";
         PreparedStatement preparedStatementFKOne = connection.prepareStatement(setFKChecksToOne);
         preparedStatementFKOne.executeUpdate();
     }
-
-    //finds if the current comment is already liked
-    private boolean commentIsLiked(User user, Comment comment) throws SQLException {
-        Connection connection = DBManager.INSTANCE.getConnection();
-        String sql = "select * from users_liked_comments where user_id = ? and comment_id = ?;";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
-            preparedStatement.setLong(1, user.getId());
-            preparedStatement.setLong(2, comment.getId());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            return resultSet.next();
-        }
-    }
-
-    //finds if the current comment is already disliked
-    private boolean commentIsDisliked(User user, Comment comment) throws SQLException {
-        Connection connection = DBManager.INSTANCE.getConnection();
-        String sql = "select * from users_disliked_comments where user_id = ? and comment_id = ?;";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
-            preparedStatement.setLong(1, user.getId());
-            preparedStatement.setLong(2, comment.getId());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            return resultSet.next();
-        }
-    }
-
-
 }

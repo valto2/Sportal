@@ -1,11 +1,11 @@
 package example.sportal.model.repository;
 
-import example.sportal.model.pojo.User;
+import example.sportal.model.pojo.Article;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface userRepository extends JpaRepository<User, Long> {
+public interface ArticleRepository extends JpaRepository<Article,Long> {
 
-    User getByUsername(String username);
+    public boolean existsArticleById(long id);
 }

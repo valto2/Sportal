@@ -1,7 +1,7 @@
 package example.sportal.model.validations;
 
 import example.sportal.exceptions.BadRequestException;
-import example.sportal.model.dto.RegisterUserDTO;
+import example.sportal.model.dto.user.RegisterUserDTO;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

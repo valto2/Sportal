@@ -1,7 +1,7 @@
 package example.sportal.model.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import example.sportal.model.dto.RegisterUserDTO;
+import example.sportal.model.dto.user.RegisterUserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,34 +34,6 @@ public class User {
     public User(RegisterUserDTO dto) {
         setUsername(dto.getUsername());
         setEmail(dto.getEmail());
-        setPassword(dto.getPassword());//TODO BCRYPT!
+        setPassword(dto.getPassword());
     }
 }
-
-
-
-//    public User(String username, String email, String password) {
-//        this.username = username;
-//        this.email = email;
-//        this.password = password;
-//    }
-//
-//    public User(Integer id, String username, String password, String email, Boolean isAdmin) {
-//        this.id = id;
-//        this.username = username;
-//        this.password = password;
-//        this.email = email;
-//        this.isAdmin = isAdmin;
-//    }
-//
-//    @Override
-//    public String toString() {
-//        return "User{" +
-//                "id=" + id +
-//                ", username='" + username + '\'' +
-//                ", email='" + email + '\'' +
-//                ", password='" + password + '\'' +
-//                ", isAdmin=" + isAdmin +
-//                '}';
-//    }
-//}

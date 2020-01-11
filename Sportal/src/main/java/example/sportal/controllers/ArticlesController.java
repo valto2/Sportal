@@ -19,9 +19,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @RestController
 public class ArticlesController extends AbstractController {
-
     @Autowired
     private ArticleDAO articlesDAO;
     @Autowired
@@ -136,9 +136,9 @@ public class ArticlesController extends AbstractController {
         }
 
         Article article = new Article(editArticleDTO);
-        if(this.articlesDAO.edit(article)>0){
+        if (this.articlesDAO.edit(article) > 0) {
             return editArticleDTO;
-        }else {
+        } else {
             throw new NotExistsObjectExceptions(NOT_EXISTS_OBJECT);
         }
     }
