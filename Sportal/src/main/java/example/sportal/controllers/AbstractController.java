@@ -13,37 +13,24 @@ public abstract class AbstractController {
 
     // key session
     static final String LOGGED_USER_KEY_IN_SESSION = "loggedUser";
-    static final String RETURN_ARTICLE = "fullDataArticle";
-    static final String CREATE_NEW_ARTICLE = "newArticle";
 
     // responses
-    static final String WRONG_CREDENTIALS = "Your username, email or password is wrong!";
     static final String LOGIN_MESSAGES = "You must be logged in!";
     static final String SOMETHING_WENT_WRONG = "Please try again!";
     static final String PASSWORD_NOT_MATCH = "Your password does not match!";
-
     static final String USER_DOES_NOT_EXISTS = "The user does not exists!";
-    static final String EXISTS = "The Object already exists!";
-    static final String FAILED_CREDENTIALS = "Validating your data is failed!";
-    private static final String TRY_AGAIN = "Please try again later!";
-
     static final String WRONG_INFORMATION = "Wrong information about the user or empty fields!";
     static final String COPYRIGHT = "Sportal holds the copyright of this article.";
     static final String NOT_EXISTS_OBJECT = "Not found!";
+    public static final String WRONG_REQUEST = "Invalid request!";
+    static final String WITHOUT_MORE_VOTE = "Without more likes from you on this article!";
+    static final String NOT_ALLOWED_OPERATION = "The operation you want to perform is not allowed for you!";
 
-    static final String WRONG_REQUEST = "Invalid request!";
-
-    @ExceptionHandler(SQLException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ExceptionObject handlerOfSQLException(Exception e) {
-        ExceptionObject exceptionObject = new ExceptionObject(
-                e.getMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                LocalDateTime.now(),
-                e.getClass().getName()
-        );
-        return exceptionObject;
-    }
+    // parameters
+    static final String ARTICLE_ID = "article_id";
+    static final String CATEGORY_ID = "category_id";
+    static final String PICTURE_ID = "picture_id";
+    static final String TITLE_OR_CATEGORY = "title_or_category";
 
     @ExceptionHandler(WrongCredentialsException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -105,9 +92,9 @@ public abstract class AbstractController {
         return exceptionObject;
     }
 
-    @ExceptionHandler(SomethingWentWrongException.class)
+    @ExceptionHandler(TransactionException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ExceptionObject handlerOfSomethingWentWrongException(Exception e) {
+    public ExceptionObject handlerOfTransactionException(Exception e) {
         ExceptionObject exceptionObject = new ExceptionObject(
                 e.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -117,9 +104,21 @@ public abstract class AbstractController {
         return exceptionObject;
     }
 
-    @ExceptionHandler(TransactionException.class)
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionObject handlerOfBadRequestException(Exception e) {
+        ExceptionObject exceptionObject = new ExceptionObject(
+                e.getMessage(),
+                HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now(),
+                e.getClass().getName()
+        );
+        return exceptionObject;
+    }
+
+    @ExceptionHandler(SomethingWentWrongException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ExceptionObject handlerOfTransactionException(Exception e) {
+    public ExceptionObject handlerOfSomethingWentWrongException(Exception e) {
         ExceptionObject exceptionObject = new ExceptionObject(
                 e.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -141,12 +140,24 @@ public abstract class AbstractController {
         return exceptionObject;
     }
 
+    @ExceptionHandler(SQLException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ExceptionObject handlerOfSQLException(Exception e) {
+        ExceptionObject exceptionObject = new ExceptionObject(
+                e.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                LocalDateTime.now(),
+                e.getClass().getName()
+        );
+        return exceptionObject;
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.I_AM_A_TEAPOT)
     public ExceptionObject handlerOfException(Exception e) {
         ExceptionObject exceptionObject = new ExceptionObject(
                 e.getMessage(),
-                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.I_AM_A_TEAPOT.value(),
                 LocalDateTime.now(),
                 e.getClass().getName()
         );

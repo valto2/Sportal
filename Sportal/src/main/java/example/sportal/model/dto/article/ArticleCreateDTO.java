@@ -1,20 +1,20 @@
 package example.sportal.model.dto.article;
 
+import example.sportal.model.dto.picture.PictureDTO;
 import example.sportal.model.pojo.Category;
-import example.sportal.model.pojo.Picture;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Collection;
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
 @Setter
-public class CreateArticleDTO {
+public class ArticleCreateDTO {
 
     private String title;
     private String fullText;
-    private Collection<Category> categories;
-    private Collection<Picture> pictures;
+    private List<Category> categories;
+    private List<PictureDTO> pictures;
 }

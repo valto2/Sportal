@@ -1,13 +1,15 @@
 package example.sportal.controllers;
 
+import example.sportal.exceptions.AuthorizationException;
+import example.sportal.exceptions.BadRequestException;
+import example.sportal.exceptions.ExistsObjectException;
+import example.sportal.exceptions.SomethingWentWrongException;
 import example.sportal.model.dao.UsersLikeArticlesDAO;
-import example.sportal.model.dto.article.ReturnFullDataArticleDTO;
+import example.sportal.model.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
 import java.sql.SQLException;
 
 @RestController
@@ -16,36 +18,40 @@ public class LikeArticleController extends AbstractController {
     @Autowired
     private UsersLikeArticlesDAO likeArticlesDAO;
 
-    @PostMapping(value = "/likes_articles")
-    public String add(HttpServletResponse response,
-                      HttpSession session) throws IOException, SQLException {
-        if (session.getAttribute("userId") == null) {
-            response.sendRedirect("/login");
+    @PostMapping(value = "/users/like_articles/{" + ARTICLE_ID + "}")
+    public long likeOfArticle(@PathVariable(name = ARTICLE_ID) long articleId,
+                              HttpSession session) throws SQLException, BadRequestException {
+        if (articleId < 1) {
+            throw new BadRequestException(WRONG_REQUEST);
         }
-        long userId = (long) session.getAttribute("userId");
-        if (session.getAttribute("articleId") == null) {
-            response.sendRedirect("/categories");
+        User user = (User) session.getAttribute(LOGGED_USER_KEY_IN_SESSION);
+        if (user == null) {
+            throw new AuthorizationException(LOGIN_MESSAGES);
         }
-        long articleId = (long) session.getAttribute("articleId");
-        if (this.likeArticlesDAO.existsInThirdTable(articleId, userId)) {
-            return "Without more likes from you on this article!";
+        if (this.likeArticlesDAO.existsInThirdTable(articleId, user.getId())) {
+            throw new ExistsObjectException(WITHOUT_MORE_VOTE);
         }
-        if (this.likeArticlesDAO.addInThirdTable(articleId, userId)) {
-            return "Likes article!";
+        if (this.likeArticlesDAO.addInThirdTable(articleId, user.getId()) > 0) {
+            return articleId;
+        } else {
+            throw new SomethingWentWrongException(SOMETHING_WENT_WRONG);
         }
-        // vasko : return - what object?
-        return "Please try again!";
     }
 
-    @GetMapping(value = "/likes_articles/{article_id}")
-    public void all(@PathVariable("article_id") Long articleID,
-                    HttpServletResponse response,
-                    HttpSession session) throws SQLException, IOException {
-        ReturnFullDataArticleDTO returnFullDataArticleDTO = (ReturnFullDataArticleDTO) session.getAttribute(RETURN_ARTICLE);
-        returnFullDataArticleDTO.setNumberOfLikes(this.likeArticlesDAO.allById(articleID));
-        session.setAttribute(RETURN_ARTICLE, returnFullDataArticleDTO);
-        response.sendRedirect("/users/" + returnFullDataArticleDTO.getArticle().getAuthorId());
+    @DeleteMapping(value = "/users/like_articles/{" + ARTICLE_ID + "}")
+    public long deleteLikeOfArticle(@PathVariable(name = ARTICLE_ID) long articleId,
+                                    HttpSession session) throws SQLException, BadRequestException {
+        if (articleId < 1) {
+            throw new BadRequestException(WRONG_REQUEST);
+        }
+        User user = (User) session.getAttribute(LOGGED_USER_KEY_IN_SESSION);
+        if (user == null) {
+            throw new AuthorizationException(LOGIN_MESSAGES);
+        }
+        if (this.likeArticlesDAO.deleteFromThirdTable(articleId, user.getId()) > 0) {
+            return articleId;
+        } else {
+            throw new AuthorizationException(NOT_ALLOWED_OPERATION);
+        }
     }
-
-    // vasko : delete
 }

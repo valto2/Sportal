@@ -4,5 +4,5 @@ import java.sql.SQLException;
 
 public interface IDAODeleteFromThirdTable {
 
-   void deleteFromThirdTable(long leftColumn, long rightColumn) throws SQLException;
+   int deleteFromThirdTable(long leftColumn, long rightColumn) throws SQLException;
 }

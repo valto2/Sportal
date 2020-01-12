@@ -7,9 +7,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class EditArticleDTO {
+public class ArticleBeforeEditDTO {
 
     private long id;
-    private String title;
-    private String fullText;
+    private String oldTitle;
+    private String oldFullText;
 }

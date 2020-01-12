@@ -4,6 +4,6 @@ import java.sql.SQLException;
 
 public interface IDAODeleteById {
 
-    int deleteById(long id) throws SQLException;
+    void deleteById(long id) throws SQLException;
 
 }
